@@ -1,0 +1,38 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31717.71
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CacheService", "src\CacheService.csproj", "{CEDECBFE-4A08-4F6E-BE4E-C57BB127BBBD}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CacheService.Tests", "tests\CacheService.Tests.csproj", "{851116D7-EDCF-4E9B-93B2-84AD0E2A875B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".repo", ".repo", "{E6143465-3421-482D-B29E-71738548192F}"
+	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
+		LICENSE = LICENSE
+		README.md = README.md
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CEDECBFE-4A08-4F6E-BE4E-C57BB127BBBD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CEDECBFE-4A08-4F6E-BE4E-C57BB127BBBD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CEDECBFE-4A08-4F6E-BE4E-C57BB127BBBD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CEDECBFE-4A08-4F6E-BE4E-C57BB127BBBD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{851116D7-EDCF-4E9B-93B2-84AD0E2A875B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{851116D7-EDCF-4E9B-93B2-84AD0E2A875B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{851116D7-EDCF-4E9B-93B2-84AD0E2A875B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{851116D7-EDCF-4E9B-93B2-84AD0E2A875B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {C20BCACC-8A67-48A0-B2DD-EEDC6D9922B3}
+	EndGlobalSection
+EndGlobal
