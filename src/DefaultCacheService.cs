@@ -19,16 +19,7 @@ namespace CacheService
             _logger = logger;
         }
 
-        public Task<T?> GetOrSetAsync<T>(string key, Func<CancellationToken, Task<T>> getter, CancellationToken cancellationToken = default)
-            => GetOrSetAsync(key, CacheServiceOptions.Default, getter, cancellationToken);
-
-        public Task<T?> GetOrSetAsync<T>(string key, Func<T> getter, CancellationToken cancellationToken = default)
-            => GetOrSetAsync(key, CacheServiceOptions.Default, getter, cancellationToken);
-
-        public Task<T?> GetOrSetAsync<T>(string key, CacheServiceOptions options, Func<T> getter, CancellationToken cancellationToken = default)
-           => GetOrSetAsync(key, options, ct => Task.FromResult(getter()), cancellationToken);
-
-        public async Task<T?> GetOrSetAsync<T>(string key, CacheServiceOptions options, Func<CancellationToken, Task<T>> getter, CancellationToken cancellationToken = default)
+        public async Task<T?> GetOrSetAsync<T>(string key, CacheServiceOptions options, Func<CancellationToken, Task<T?>> getter, CancellationToken cancellationToken = default) where T: class
         {
             cancellationToken.ThrowIfCancellationRequested();
 
