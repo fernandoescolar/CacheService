@@ -10,7 +10,7 @@ namespace CacheService
         private readonly IMemoryCache _memoryCache;
         private readonly IDistributedCache _distributedCache;
         private readonly ILogger<DefaultCacheService> _logger;
-        private readonly JsonSerializerOptions _jsonSerializerOptions = new JsonSerializerOptions();
+        private readonly JsonSerializerOptions _jsonSerializerOptions = new();
 
         public DefaultCacheService(IMemoryCache memoryCache, IDistributedCache distributedCache, ILogger<DefaultCacheService> logger)
         {
@@ -58,13 +58,11 @@ namespace CacheService
                 {
                     using (var ms = new MemoryStream(bytes))
                     {
-
                         var result = await JsonSerializer.DeserializeAsync<T>(ms, _jsonSerializerOptions, cancellationToken);
                         if (result is not null)
                         {
                             return result;
                         }
-
                     }
                 }
             }
@@ -101,7 +99,7 @@ namespace CacheService
         {
             using var ms = new MemoryStream();
             await JsonSerializer.SerializeAsync(ms, result, _jsonSerializerOptions, cancellationToken);
-            await _distributedCache.SetAsync(key, ms.GetBuffer(), cancellationToken);
+            await _distributedCache.SetAsync(key, ms.GetBuffer(), options, cancellationToken);
         }
     }
 }
