@@ -1,6 +1,8 @@
-namespace CacheService.OverEngineered
+using CacheService.ChainLinks;
+
+namespace CacheService.Core
 {
-    public abstract class ChainOfResponsibility
+    internal abstract class ChainOfResponsibility
     {
         private readonly List<IChainLink> _links = new List<IChainLink>();
 
@@ -8,7 +10,9 @@ namespace CacheService.OverEngineered
         {
             var first = _links.FirstOrDefault();
             if (first is null)
+            {
                 return Task.FromResult<T?>(default);
+            }
 
             return first.HandleAsync(context);
         }
@@ -18,7 +22,6 @@ namespace CacheService.OverEngineered
             var last = _links.LastOrDefault();
             if (last is not null)
             {
-                link.Previous = last;
                 last.Next = link;
             }
 

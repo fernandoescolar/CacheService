@@ -1,10 +1,11 @@
+using CacheService.Core;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
 
-namespace CacheService.OverEngineered
+namespace CacheService.ChainLinks
 {
-    public class DistributedChainLink : ChainLink
+    internal class DistributedChainLink : ChainLink
     {
         private static readonly JsonSerializerOptions _jsonSerializerOptions = new JsonSerializerOptions();
 
@@ -36,9 +37,13 @@ namespace CacheService.OverEngineered
                     }
                 }
             }
+            catch(JsonException jex)
+            {
+                _logger.LogWarning($"Cannot deserialize from json in DistributedCache with key: {context.Key} -> {jex}");
+            }
             catch (Exception ex)
             {
-                _logger.LogWarning($"Invalid json format found reading from DistributedCache with key: {context.Key} -> {ex}");
+                _logger.LogWarning($"Cannot get from DistributedCache with key: {context.Key} -> {ex}");
             }
 
             return default;
@@ -46,9 +51,20 @@ namespace CacheService.OverEngineered
 
         protected override async Task OnSetAsync<T>(ChainContext<T> context)
         {
-            using var ms = new MemoryStream();
-            await JsonSerializer.SerializeAsync(ms, context.Value, _jsonSerializerOptions, context.CancellationToken);
-            await _distributedCache.SetAsync(context.Key, ms.GetBuffer(), context.CancellationToken);
+            try
+            {
+                using var ms = new MemoryStream();
+                await JsonSerializer.SerializeAsync(ms, context.Value, _jsonSerializerOptions, context.CancellationToken);
+                await _distributedCache.SetAsync(context.Key, ms.GetBuffer(), context.CancellationToken);
+            }
+            catch(JsonException jex)
+            {
+                _logger.LogWarning($"Cannot serialize to json in DistributedCache with key: {context.Key} -> {jex}");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning($"Cannot set to DistributedCache with key: {context.Key} -> {ex}");
+            }
         }
     }
 }

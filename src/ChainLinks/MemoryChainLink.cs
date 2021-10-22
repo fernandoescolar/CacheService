@@ -1,8 +1,9 @@
+using CacheService.Core;
 using Microsoft.Extensions.Caching.Memory;
 
-namespace CacheService.OverEngineered
+namespace CacheService.ChainLinks
 {
-    public class MemoryChainLink : ChainLink
+    internal class MemoryChainLink : ChainLink
     {
         private readonly IMemoryCache _memoryCache;
 
