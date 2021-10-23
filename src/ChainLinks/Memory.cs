@@ -3,11 +3,11 @@ using Microsoft.Extensions.Caching.Memory;
 
 namespace CacheService.ChainLinks
 {
-    internal class MemoryChainLink : ChainLink
+    internal class Memory : ChainLink
     {
         private readonly IMemoryCache _memoryCache;
 
-        public MemoryChainLink(IMemoryCache memoryCache)
+        public Memory(IMemoryCache memoryCache)
         {
             _memoryCache = memoryCache;
         }
@@ -19,7 +19,8 @@ namespace CacheService.ChainLinks
         {
             using var entry = _memoryCache.CreateEntry(context.Key);
             entry.Value = context.Value;
-            entry.AbsoluteExpiration = context.Options.AbsoluteExpiration;
+            entry.AbsoluteExpiration = context.Options.Memory.AbsoluteExpiration;
+            entry.SlidingExpiration = context.Options.Memory.SlidingExpiration;
             return Task.CompletedTask;
         }
     }

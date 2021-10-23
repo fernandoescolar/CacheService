@@ -1,16 +1,19 @@
-﻿using CacheService.ChainLinks;
+﻿using CacheService.Background;
+using CacheService.ChainLinks;
 using CacheService.Core;
 
 namespace CacheService
 {
     internal sealed class DefaultCacheService : ChainOfResponsibility, ICacheService
     {
-        public DefaultCacheService(MemoryChainLink memoryChainLink, DistributedChainLink distributedChainLink, SourceChainLink sourceChainLink)
+        public DefaultCacheService(AddOrUpdateJob bgChainLink, Memory memoryChainLink, Distributed distributedChainLink, Source sourceChainLink)
         {
+            bgChainLink = bgChainLink ?? throw new ArgumentNullException(nameof(bgChainLink));
             memoryChainLink = memoryChainLink ?? throw new ArgumentNullException(nameof(memoryChainLink));
             distributedChainLink = distributedChainLink ?? throw new ArgumentNullException(nameof(distributedChainLink));
             sourceChainLink = sourceChainLink ?? throw new ArgumentNullException(nameof(sourceChainLink));
 
+            AddLink(bgChainLink);
             AddLink(memoryChainLink);
             AddLink(distributedChainLink);
             AddLink(sourceChainLink);

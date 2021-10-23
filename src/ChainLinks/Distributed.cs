@@ -5,14 +5,14 @@ using System.Text.Json;
 
 namespace CacheService.ChainLinks
 {
-    internal class DistributedChainLink : ChainLink
+    internal class Distributed : ChainLink
     {
         private static readonly JsonSerializerOptions _jsonSerializerOptions = new JsonSerializerOptions();
 
         private readonly IDistributedCache _distributedCache;
-        private readonly ILogger<DistributedChainLink> _logger;
+        private readonly ILogger<Distributed> _logger;
 
-        public DistributedChainLink(IDistributedCache distributedCache, ILogger<DistributedChainLink> logger)
+        public Distributed(IDistributedCache distributedCache, ILogger<Distributed> logger)
         {
             _distributedCache = distributedCache;
             _logger = logger;
@@ -55,7 +55,7 @@ namespace CacheService.ChainLinks
             {
                 using var ms = new MemoryStream();
                 await JsonSerializer.SerializeAsync(ms, context.Value, _jsonSerializerOptions, context.CancellationToken);
-                await _distributedCache.SetAsync(context.Key, ms.GetBuffer(), context.CancellationToken);
+                await _distributedCache.SetAsync(context.Key, ms.GetBuffer(), context.Options.Distributed, context.CancellationToken);
             }
             catch(JsonException jex)
             {

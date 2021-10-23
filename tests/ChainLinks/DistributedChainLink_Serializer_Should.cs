@@ -55,16 +55,16 @@ namespace CacheService.Tests.ChainLinks
 
     public class DistributedChainLink_Serializer_Should : IDisposable
     {
-        private readonly ILogger<DistributedChainLink> logger;
+        private readonly ILogger<Distributed> logger;
         private readonly Mock<IDistributedCache> distributedCache;
-        private readonly DistributedChainLink target;
+        private readonly Distributed target;
         private readonly CancellationTokenSource testScope;
 
         public DistributedChainLink_Serializer_Should()
         {
-            logger = NullLogger<DistributedChainLink>.Instance;
+            logger = NullLogger<Distributed>.Instance;
             distributedCache = new Mock<IDistributedCache>();
-            target = new DistributedChainLink(distributedCache.Object, logger);
+            target = new Distributed(distributedCache.Object, logger);
             testScope = new CancellationTokenSource();
         }
 
