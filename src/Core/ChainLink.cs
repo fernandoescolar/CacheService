@@ -4,7 +4,7 @@ namespace CacheService.Core
     {
         public IChainLink? Next { get; set; }
 
-        public async Task<T?> HandleAsync<T>(ChainContext<T> context) where T : class
+        public async ValueTask<T?> HandleAsync<T>(ChainContext<T> context) where T : class
         {
             context.Value = await OnGetAsync(context);
             if (context.Value is null && Next is not null)
@@ -19,8 +19,8 @@ namespace CacheService.Core
             return context.Value;
         }
 
-        protected virtual Task<T?> OnGetAsync<T>(ChainContext<T> context) where T : class
-            => Task.FromResult<T?>(default);
+        protected virtual ValueTask<T?> OnGetAsync<T>(ChainContext<T> context) where T : class
+            => ValueTask.FromResult<T?>(default);
 
         protected virtual Task OnSetAsync<T>(ChainContext<T> context)
             => Task.CompletedTask;

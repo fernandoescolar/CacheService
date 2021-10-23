@@ -6,13 +6,13 @@ namespace CacheService.Core
 
         public CacheServiceOptions Options { get; }
 
-        public Func<CancellationToken, Task<T?>> ValueGetter { get; }
+        public Func<CancellationToken, ValueTask<T?>> ValueGetter { get; }
 
         public CancellationToken CancellationToken { get; }
 
         public T? Value { get; set; }
 
-        public ChainContext(string key, CacheServiceOptions options, Func<CancellationToken, Task<T?>> valueGetter, CancellationToken cancellationToken = default)
+        public ChainContext(string key, CacheServiceOptions options, Func<CancellationToken, ValueTask<T?>> valueGetter, CancellationToken cancellationToken = default)
         {
             Key = key;
             Options = options;

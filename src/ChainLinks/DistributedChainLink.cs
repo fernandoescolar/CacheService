@@ -18,7 +18,7 @@ namespace CacheService.ChainLinks
             _logger = logger;
         }
 
-        protected override async Task<T?> OnGetAsync<T>(ChainContext<T> context) where T: class
+        protected override async ValueTask<T?> OnGetAsync<T>(ChainContext<T> context) where T: class
         {
             try
             {

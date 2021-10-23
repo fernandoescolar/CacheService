@@ -5,7 +5,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using System;
-using System.Runtime.Serialization;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading;
@@ -39,7 +38,7 @@ namespace CacheService.Tests.ChainLinks
 
     public class DummyChainLink : ChainLink 
     {
-        private readonly object _value = default;
+        private readonly object? _value = default;
 
         public DummyChainLink()
         {
@@ -50,8 +49,8 @@ namespace CacheService.Tests.ChainLinks
             _value = value;
         }
 
-        protected override Task<T?> OnGetAsync<T>(ChainContext<T> context) where T : class
-            => Task.FromResult(_value as T);
+        protected override ValueTask<T?> OnGetAsync<T>(ChainContext<T> context) where T : class
+            => ValueTask.FromResult(_value as T);
     }
 
     public class DistributedChainLink_Serializer_Should : IDisposable
@@ -82,7 +81,7 @@ namespace CacheService.Tests.ChainLinks
         public async Task Not_Throw_an_exception_When_distributed_cache_returns_invalid_values(byte[] invalidValue)
         {
             const string someKey = "whatever";
-            var someDummyObjectGetter = (CancellationToken ct) => Task.FromResult(new DummyObject()); 
+            var someDummyObjectGetter = (CancellationToken ct) => ValueTask.FromResult(new DummyObject()); 
 
 
             distributedCache.Setup(x => x.GetAsync(someKey, It.IsAny<CancellationToken>()))

@@ -1,17 +1,15 @@
-using CacheService.ChainLinks;
-
 namespace CacheService.Core
 {
     internal abstract class ChainOfResponsibility
     {
         private readonly List<IChainLink> _links = new List<IChainLink>();
 
-        public Task<T?> HandleAsync<T>(ChainContext<T> context) where T: class
+        public ValueTask<T?> HandleAsync<T>(ChainContext<T> context) where T: class
         {
             var first = _links.FirstOrDefault();
             if (first is null)
             {
-                return Task.FromResult<T?>(default);
+                return ValueTask.FromResult<T?>(default);
             }
 
             return first.HandleAsync(context);

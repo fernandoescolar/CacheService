@@ -4,6 +4,6 @@ namespace CacheService.Core
     {
         IChainLink? Next { get; set; }
 
-        Task<T?> HandleAsync<T>(ChainContext<T> context) where T: class;
+        ValueTask<T?> HandleAsync<T>(ChainContext<T> context) where T: class;
     }
 }

@@ -12,8 +12,8 @@ namespace CacheService.ChainLinks
             _memoryCache = memoryCache;
         }
 
-        protected override Task<T?> OnGetAsync<T>(ChainContext<T> context)  where T: class
-            => Task.FromResult(_memoryCache.TryGetValue(context.Key, out var value) ? (T?)value : default);
+        protected override ValueTask<T?> OnGetAsync<T>(ChainContext<T> context)  where T: class
+            => ValueTask.FromResult(_memoryCache.TryGetValue(context.Key, out var value) ? (T?)value : default);
 
         protected override Task OnSetAsync<T>(ChainContext<T> context)
         {
