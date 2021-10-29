@@ -1,19 +1,17 @@
-﻿using CacheService.ChainLinks;
-using CacheService.Core;
+﻿using CacheService.Core;
 
 namespace CacheService
 {
     internal sealed class DefaultCacheService : ChainOfResponsibility, ICacheService
     {
-        public DefaultCacheService(MemoryChainLink memoryChainLink, DistributedChainLink distributedChainLink, SourceChainLink sourceChainLink)
+        public DefaultCacheService(IEnumerable<IChainLink> chainLinks)
         {
-            memoryChainLink = memoryChainLink ?? throw new ArgumentNullException(nameof(memoryChainLink));
-            distributedChainLink = distributedChainLink ?? throw new ArgumentNullException(nameof(distributedChainLink));
-            sourceChainLink = sourceChainLink ?? throw new ArgumentNullException(nameof(sourceChainLink));
+            chainLinks = chainLinks ?? throw new ArgumentNullException(nameof(chainLinks));
 
-            AddLink(memoryChainLink);
-            AddLink(distributedChainLink);
-            AddLink(sourceChainLink);
+            foreach (var chainLink in chainLinks.OrderBy(x => x.Order))
+            {
+                AddLink(chainLink);
+            }
         }
 
         public ValueTask<T?> GetOrSetAsync<T>(string key, CacheServiceOptions options, Func<CancellationToken, ValueTask<T?>> getter, CancellationToken cancellationToken = default) where T: class

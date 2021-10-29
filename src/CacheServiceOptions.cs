@@ -1,9 +1,11 @@
-﻿using Microsoft.Extensions.Caching.Distributed;
-
-namespace CacheService
+﻿namespace CacheService
 {
-    public class CacheServiceOptions : DistributedCacheEntryOptions
+    public class CacheServiceOptions 
     {
         public static readonly CacheServiceOptions Default = new();
+
+        public CacheOptions Distributed { get; set; } = new();
+
+        public CacheOptions Memory { get; set; } = new();
     }
 }

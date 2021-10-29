@@ -12,3 +12,12 @@ Workflow `GetOrSet()`:
 In background:
 1. All values read from any source or cache should automatically updated in background in an specified time
 
+## Use
+
+```chsarp
+
+services.AddMemoryCache();
+services.AddRedisDistributedCache(op => ...);
+services.AddCacheService(op => ...);
+
+```

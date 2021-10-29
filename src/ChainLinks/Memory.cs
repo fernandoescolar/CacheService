@@ -1,13 +1,15 @@
 using CacheService.Core;
+using CacheService.Extensions;
 using Microsoft.Extensions.Caching.Memory;
 
 namespace CacheService.ChainLinks
 {
-    internal class MemoryChainLink : ChainLink
+    internal class Memory : ChainLink
     {
         private readonly IMemoryCache _memoryCache;
 
-        public MemoryChainLink(IMemoryCache memoryCache)
+        public Memory(IMemoryCache memoryCache)
+            : base(10)
         {
             _memoryCache = memoryCache;
         }
@@ -17,9 +19,7 @@ namespace CacheService.ChainLinks
 
         protected override Task OnSetAsync<T>(ChainContext<T> context)
         {
-            using var entry = _memoryCache.CreateEntry(context.Key);
-            entry.Value = context.Value;
-            entry.AbsoluteExpiration = context.Options.AbsoluteExpiration;
+            _memoryCache.Set(context.Key, context.Value, context.Options.Memory);
             return Task.CompletedTask;
         }
     }
