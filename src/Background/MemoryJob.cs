@@ -1,23 +1,24 @@
-﻿using Microsoft.Extensions.Caching.Memory;
-using CacheService.Extensions;
+﻿using CacheService.Extensions;
 using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace CacheService.Background
 {
     internal class MemoryJob<T> : Job<T>
     {
-        private readonly IMemoryCache _memoryCache;
+        private readonly MemoryCacheFactory _factory;
 
-        public MemoryJob(IMemoryCache memoryCache, JobParameters<T> parameters) 
+        public MemoryJob(MemoryCacheFactory factory, JobParameters<T> parameters) 
             : base(parameters)
         {
-            _memoryCache = memoryCache;
+            _factory = factory;
         }
 
         protected override async Task OnExecuteAsync(CancellationToken cancellationToken)
         {
+            var memoryCache = _factory();
             var value = await ValueGetter(cancellationToken);
-            _memoryCache.Set(Key, value, Options);
+            memoryCache.Set(Key, value, Options);
         }
     }
 }

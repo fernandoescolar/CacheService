@@ -9,6 +9,8 @@ namespace CacheService.ChainLinks
 
         public IChainLink? Next { get; set; }
 
+        public ushort Order => 0;
+
         public AddOrUpdateJob(IJobManager bgManager)
         {
             _bgManager = bgManager;

@@ -7,19 +7,26 @@ namespace CacheService.Tests
 {
     public class DummyCacheEntry : ICacheEntry
     {
-        public object? Key { get; set; }
+        public DummyCacheEntry(string key)
+        {
+            KeyString = key;
+        }
+
+        public object Key => KeyString;
+
+        public string KeyString { get; set; }
 
         public object? Value { get; set; }
 
         public DateTimeOffset? AbsoluteExpiration { get; set; }
 
         public TimeSpan? AbsoluteExpirationRelativeToNow { get; set; }
-
+        
         public TimeSpan? SlidingExpiration { get; set; }
 
-        public IList<IChangeToken>? ExpirationTokens { get; set; }
+        public IList<IChangeToken> ExpirationTokens { get; set; } = new List<IChangeToken>();
 
-        public IList<PostEvictionCallbackRegistration>? PostEvictionCallbacks { get; set; }
+        public IList<PostEvictionCallbackRegistration> PostEvictionCallbacks { get; set; } = new List<PostEvictionCallbackRegistration>();
 
         public CacheItemPriority Priority { get; set; }
 

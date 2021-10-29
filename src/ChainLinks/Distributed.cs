@@ -7,14 +7,15 @@ namespace CacheService.ChainLinks
 {
     internal class Distributed : ChainLink
     {
-        private static readonly JsonSerializerOptions _jsonSerializerOptions = new JsonSerializerOptions();
-
         private readonly IDistributedCache _distributedCache;
+        private readonly ICacheSerializer _serializer;
         private readonly ILogger<Distributed> _logger;
 
-        public Distributed(IDistributedCache distributedCache, ILogger<Distributed> logger)
+        public Distributed(IDistributedCache distributedCache, ICacheSerializer serializer, ILogger<Distributed> logger) 
+            : base(20)
         {
             _distributedCache = distributedCache;
+            _serializer = serializer;
             _logger = logger;
         }
 
@@ -25,16 +26,7 @@ namespace CacheService.ChainLinks
                 var bytes = await _distributedCache.GetAsync(context.Key, context.CancellationToken);
                 if (bytes is not null && bytes.Length > 0)
                 {
-                    using (var ms = new MemoryStream(bytes))
-                    {
-
-                        var result = await JsonSerializer.DeserializeAsync<T>(ms, _jsonSerializerOptions, context.CancellationToken);
-                        if (result is not null)
-                        {
-                            return result;
-                        }
-
-                    }
+                    return await _serializer.DeserializeAsync<T>(bytes, context.CancellationToken);
                 }
             }
             catch(JsonException jex)
@@ -53,9 +45,8 @@ namespace CacheService.ChainLinks
         {
             try
             {
-                using var ms = new MemoryStream();
-                await JsonSerializer.SerializeAsync(ms, context.Value, _jsonSerializerOptions, context.CancellationToken);
-                await _distributedCache.SetAsync(context.Key, ms.GetBuffer(), context.Options.Distributed, context.CancellationToken);
+                var bytes = await _serializer.SerializeAsync(context.Value, context.CancellationToken);
+                await _distributedCache.SetAsync(context.Key, bytes, context.Options.Distributed, context.CancellationToken);
             }
             catch(JsonException jex)
             {

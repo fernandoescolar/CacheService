@@ -2,7 +2,16 @@ namespace CacheService.Core
 {
     public abstract class ChainLink : IChainLink
     {
+        private ushort _order;
+
+        protected ChainLink(ushort order)
+        {
+            _order = order;
+        }
+
         public IChainLink? Next { get; set; }
+
+        public ushort Order => _order;
 
         public async ValueTask<T?> HandleAsync<T>(ChainContext<T> context) where T : class
         {
