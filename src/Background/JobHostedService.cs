@@ -13,7 +13,7 @@ namespace CacheService.Background
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            while (stoppingToken.IsCancellationRequested)
+            while (!stoppingToken.IsCancellationRequested)
             {
                 await Task.Delay(1000, stoppingToken);
                 await _bgManager.ExecuteJobsAsync(stoppingToken); 
