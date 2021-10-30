@@ -22,15 +22,15 @@ namespace CacheService.Background
         public void AddOrUpdateJob<T>(string key, Func<CancellationToken, ValueTask<T?>> valueGetter, CacheServiceOptions options) where T : class
         {
             var memoryJob = new MemoryJob<T>(_memoryCacheFactory, new JobParameters<T>(key, options.Memory, valueGetter));
-            _jobs.AddOrUpdate(key, memoryJob, (k, j) => j.UpdateJob(memoryJob));
+            _jobs.AddOrUpdate($"MemoryJob_{key}", memoryJob, (k, j) => j.UpdateJob(memoryJob));
 
             var distributedJob = new DistributedJob<T>(_distributedCacheFactory, _serializerFactory, new JobParameters<T>(key, options.Distributed, valueGetter), _loggerFactory.CreateLogger<DistributedJob<T>>());
-            _jobs.AddOrUpdate(key, distributedJob, (k, j) => j.UpdateJob(distributedJob));
+            _jobs.AddOrUpdate($"DistributedJob_{key}", distributedJob, (k, j) => j.UpdateJob(distributedJob));
         }
 
         public Task ExecuteJobsAsync(CancellationToken cancellationToken)
         {
-            var tasks = _jobs.Where(x => x.Value.DueTime <= DateTime.UtcNow);
+            var tasks = _jobs.Where(x => x.Value.DueTime <= DateTime.UtcNow).ToList();
             return Parallel.ForEachAsync(tasks, ExecuteJobAsync);
         }
 
