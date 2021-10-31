@@ -8,10 +8,9 @@
     <IsPackable>true</IsPackable>
     <PackageId>CacheService</PackageId>
     <PackageTags>AspNetCore;cache;service</PackageTags>
-    <Authors>Fernando Escolar & Jorge Turrado</Authors>
+    <Authors>Fernando Escolar &amp; Jorge Turrado</Authors>
     <Description>Doble layer cache for dotnet.</Description>
     <PackageProjectUrl>https://github.com/fernandoescolar/CacheService</PackageProjectUrl>
-    <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageIcon>icon.png</PackageIcon>
   </PropertyGroup>
 
@@ -21,4 +20,8 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="5.0.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="../LICENSE" Pack="true" PackagePath="$(PackageLicenseFile)" />
+    <None Include="icon.png" Pack="true" PackagePath="" />
+  </ItemGroup>
 </Project>
