@@ -42,7 +42,7 @@ namespace CacheService.Tests.Integration
         {
             const string someKey = "whatever";
             var expected = new ErrorInSerialize();
-            var context = new ChainContext<ErrorInSerialize>(someKey, CacheServiceOptions.Default, null, CancellationToken);
+            var context = new ChainContext<ErrorInSerialize>(someKey, CacheServiceOptions.Default, ct => ValueTask.FromResult<ErrorInSerialize?>(default), CancellationToken);
             target.Next = new DummyChainLink(expected);
 
 
