@@ -1,0 +1,34 @@
+name: Publish
+
+on:
+  push:
+    tags:
+    - 'v*'
+
+jobs:
+  publish:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '6.0.x'
+        include-prerelease: true
+    - name: Build
+      run: dotnet build src/CacheService.csproj
+    - name: Test
+      run: dotnet test tests/CacheService.Tests.csproj
+    - name: Create the package
+      run: |
+          GITHUB_VERSION="${{ github.ref }}"
+          GITHUB_VERSION=(${GITHUB_VERSION##*/})
+          RELEASE_VERSION="${GITHUB_VERSION//v}"
+          ARRAY_VERSION=(${RELEASE_VERSION//-/ })
+          VERSION="${ARRAY_VERSION[0]}"
+          VERSION_SUFFIX="${ARRAY_VERSION[1]}"
+          dotnet pack -c Release -o nupkg ./src/CacheService.csproj -p:AssemblyVersion=$VERSION -p:VersionPrefix=$VERSION -p:VersionSuffix=$VERSION_SUFFIX -p:IncludeSymbols=true -p:SymbolPackageFormat=snupkg
+    - name: Publish the package to GPR
+      run: dotnet nuget push src/bin/Release/*.nupkg -s https://api.nuget.org/v3/index.json -k ${{secrets.NUGET_KEY}}
