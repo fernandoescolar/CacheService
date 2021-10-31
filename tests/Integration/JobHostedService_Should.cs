@@ -73,7 +73,7 @@ namespace CacheService.Tests.Integration
         private async Task RunJobHostedServiceAsync()
         {
             await JobHostedService.StartAsync(CancellationToken);
-            await Task.Delay(2000);
+            await Task.Delay(2500);
             await JobHostedService.StopAsync(CancellationToken);
         }
     }
