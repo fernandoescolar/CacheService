@@ -5,12 +5,20 @@ using System.Collections.Generic;
 
 namespace CacheService.Tests.Doubles
 {
-    internal class DummyMemoryCache : Dictionary<string, DummyCacheEntry>, IMemoryCache
+    public class DummyMemoryCache : Dictionary<string, DummyCacheEntry>, IMemoryCache
     {
         public ICacheEntry CreateEntry(object key)
         {
-            var entry = new DummyCacheEntry(key?.ToString() ?? string.Empty);
-            Add(entry.KeyString, entry);
+            var skey = key?.ToString() ?? string.Empty;
+            var entry = new DummyCacheEntry(skey);
+            if (!ContainsKey(skey))
+            {
+                Add(entry.KeyString, entry);
+            }
+            else
+            {
+                this[skey] = entry;
+            }
 
             return entry;
         }
@@ -28,8 +36,8 @@ namespace CacheService.Tests.Doubles
         {
             var k = key?.ToString() ?? string.Empty;
             if (base.ContainsKey(k))
-            { 
-                value = base[k];
+            {
+                value = base[k].Value;
                 return true;
             }
 

@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace CacheService.Tests.Doubles
 {
-    internal class DummyDistributedCache : Dictionary<string, byte[]>, IDistributedCache
+    public class DummyDistributedCache : Dictionary<string, byte[]>, IDistributedCache
     {
         public byte[]? Get(string key)
             => TryGetValue(key, out var result) ? result : default;
@@ -27,7 +27,16 @@ namespace CacheService.Tests.Doubles
         }
 
         public void Set(string key, byte[] value, DistributedCacheEntryOptions options)
-            => Add(key, value);
+        {
+            if (!ContainsKey(key))
+            {
+                Add(key, value);
+            }
+            else
+            {
+                this[key] = value;
+            }
+        }
 
         public Task SetAsync(string key, byte[] value, DistributedCacheEntryOptions options, CancellationToken token = default)
         {

@@ -17,7 +17,7 @@ namespace CacheService
         {
             using var ms = new MemoryStream();
             await JsonSerializer.SerializeAsync(ms, value, _jsonSerializerOptions, cancellationToken);
-            return ms.GetBuffer();
+            return ms.ToArray();
         }
     }
 }
