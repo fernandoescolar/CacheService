@@ -32,3 +32,8 @@ jobs:
           dotnet pack -c Release -o nupkg ./src/CacheService.csproj -p:AssemblyVersion=$VERSION -p:VersionPrefix=$VERSION -p:VersionSuffix=$VERSION_SUFFIX -p:IncludeSymbols=true -p:SymbolPackageFormat=snupkg
     - name: Publish the package to Nuget
       run: dotnet nuget push nupkg/*.nupkg -s https://api.nuget.org/v3/index.json -k ${{secrets.NUGET_KEY}}
+    - uses: AButler/upload-release-assets@v2.0
+      with:
+        files: nupkg/*.*'
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
+        release-tag: ${{ github.ref }}
