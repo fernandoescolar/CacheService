@@ -5,24 +5,26 @@ on:
     tags:
     - 'v*'
 
+name: New Release
+
 jobs:
-  publish:
-
+  pack:
     runs-on: ubuntu-latest
-
+    name: Build CacheService
     steps:
-    - uses: actions/checkout@v2
-    - name: Setup .NET Core
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: '6.0.x'
-        include-prerelease: true
-    - name: Build
-      run: dotnet build src/CacheService.csproj
-    - name: Test
-      run: dotnet test tests/CacheService.Tests.csproj
-    - name: Create the package
-      run: |
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '6.0.x'
+          include-prerelease: true
+      - name: Build
+        run: dotnet build src/CacheService.csproj
+      - name: Test
+        run: dotnet test tests/CacheService.Tests.csproj
+      - name: Create NuGet packages
+        run: |
           GITHUB_VERSION="${{ github.ref }}"
           GITHUB_VERSION=(${GITHUB_VERSION##*/})
           RELEASE_VERSION="${GITHUB_VERSION//v}"
@@ -30,10 +32,60 @@ jobs:
           VERSION="${ARRAY_VERSION[0]}"
           VERSION_SUFFIX="${ARRAY_VERSION[1]}"
           dotnet pack -c Release -o nupkg ./src/CacheService.csproj -p:AssemblyVersion=$VERSION -p:VersionPrefix=$VERSION -p:VersionSuffix=$VERSION_SUFFIX -p:IncludeSymbols=true -p:SymbolPackageFormat=snupkg
-    - name: Publish the package to Nuget
-      run: dotnet nuget push nupkg/*.nupkg -s https://api.nuget.org/v3/index.json -k ${{secrets.NUGET_KEY}}
-    - uses: AButler/upload-release-assets@v2.0
-      with:
-        files: nupkg/*.*'
-        repo-token: ${{ secrets.GITHUB_TOKEN }}
-        release-tag: ${{ github.ref }}
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: nupkg
+          path: ./nupkg/*.*
+          retention-days: 1
+  nugets:
+    needs: pack
+    runs-on: ubuntu-latest
+    name: Publish NuGet package
+    steps:
+      - name: Download Artifact
+        uses: actions/download-artifact@v1
+        with:
+          name: nupkg
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '6.0.x'
+          include-prerelease: true
+      - name: Publish NuGet packages
+        run: |
+          dotnet nuget push ./nupkg/*.nupkg -k ${{ secrets.NUGET_KEY }} -s https://api.nuget.org/v3/index.json
+  release:
+    needs: pack
+    runs-on: ubuntu-latest
+    name: Upload packages to Release
+    steps:
+      - name: Download Artifact
+        uses: actions/download-artifact@v1
+        with:
+          name: nupkg
+      - name: Get Version
+        id: vars
+        run: echo ::set-output name=tag::${GITHUB_REF#refs/*/}
+      - name: Create Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.vars.outputs.tag }}
+          release_name: Release ${{ steps.vars.outputs.tag }}
+          draft: false
+          prerelease: false
+      - uses: AButler/upload-release-assets@v2.0
+        with:
+          files: 'nupkg/*.*'
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          release-tag: ${{ steps.vars.outputs.tag }}
+  cleanup:
+    needs: release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: geekyeggo/delete-artifact@v1
+        with:
+          name: |
+            nupkg
