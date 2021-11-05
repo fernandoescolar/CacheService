@@ -19,7 +19,7 @@ namespace CacheService.Tests.Integration
         }
 
         [Fact]
-        public async Task ReadFromMemoryCache()
+        public async Task Read_From_MemoryCache()
         {
             MemoryCache.Add(key, new DummyCacheEntry(key) { Value = expected });
 
@@ -29,7 +29,7 @@ namespace CacheService.Tests.Integration
         }
 
         [Fact]
-        public async Task ReadFromDistributedCache()
+        public async Task Read_From_DistributedCache()
         {
             DistributedCache.Add(key, serialized);
 
@@ -39,7 +39,7 @@ namespace CacheService.Tests.Integration
         }
 
         [Fact]
-        public async Task ReadFromValueGetter()
+        public async Task Read_From_ValueGetter()
         {
             var actual = await Target.GetOrSetAsync(key, () => expected, CancellationToken);
 
@@ -47,7 +47,7 @@ namespace CacheService.Tests.Integration
         }
 
         [Fact]
-        public async Task WriteMemoryCacheWhenValueIsReadDistributedCache()
+        public async Task Write_MemoryCache_When_Value_Is_Read_From_DistributedCache()
         {
             DistributedCache.Add(key, serialized);
 
@@ -59,7 +59,7 @@ namespace CacheService.Tests.Integration
         }
 
         [Fact]
-        public async Task WriteMemoryCacheWhenValueIsReadFromValueGetter()
+        public async Task Write_MemoryCache_When_Value_Is_Read_From_ValueGetter()
         {
             var actual = await Target.GetOrSetAsync(key, () => expected, CancellationToken);
             var memoryValue = MemoryCache[key].Value;
@@ -69,12 +69,32 @@ namespace CacheService.Tests.Integration
         }
 
         [Fact]
-        public async Task WriteDistributedCacheWhenValueIsReadFromValueGetter()
+        public async Task Write_DistributedCache_When_Value_Is_Read_From_ValueGetter()
         {
             var actual = await Target.GetOrSetAsync(key, () => expected, CancellationToken);
             var distributedValue = DistributedCache[key];
 
             Assert.Equal(serialized, distributedValue);
+        }
+
+        [Fact]
+        public async Task Delete_MemoryCache_Value_When_It_Is_Invalidated()
+        {
+            MemoryCache.Add(key, new DummyCacheEntry(key) { Value = expected });
+
+            await Target.InvalidateAsync(key, CancellationToken);
+
+            Assert.Null(MemoryCache[key].Value);
+        }
+
+        [Fact]
+        public async Task Delete_DistributedCache_Value_When_It_Is_Invalidated()
+        {
+            DistributedCache.Add(key, serialized);
+
+            await Target.InvalidateAsync(key, CancellationToken);
+
+            Assert.Null(DistributedCache[key]);
         }
     }
 }
