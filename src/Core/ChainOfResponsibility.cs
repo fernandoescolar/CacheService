@@ -2,7 +2,7 @@ namespace CacheService.Core
 {
     internal abstract class ChainOfResponsibility
     {
-        private readonly List<IChainLink> _links = new List<IChainLink>();
+        private readonly List<IChainLink> _links = new();
 
         public ValueTask<T?> HandleAsync<T>(ChainContext<T> context) where T: class
         {
