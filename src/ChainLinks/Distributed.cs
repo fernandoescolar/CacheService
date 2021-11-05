@@ -31,11 +31,11 @@ namespace CacheService.ChainLinks
             }
             catch(JsonException jex)
             {
-                _logger.LogWarning($"Cannot deserialize from json in DistributedCache with key: {context.Key} -> {jex}");
+                _logger.LogWarning("Cannot deserialize from json in DistributedCache with key: {Key} -> {jex}", context.Key, jex);
             }
             catch (Exception ex)
             {
-                _logger.LogWarning($"Cannot get from DistributedCache with key: {context.Key} -> {ex}");
+                _logger.LogWarning("Cannot get from DistributedCache with key: {Key} -> {ex}", context.Key, ex);
             }
 
             return default;
@@ -50,11 +50,11 @@ namespace CacheService.ChainLinks
             }
             catch(JsonException jex)
             {
-                _logger.LogWarning($"Cannot serialize to json in DistributedCache with key: {context.Key} -> {jex}");
+                _logger.LogWarning("Cannot serialize to json in DistributedCache with key: {Key} -> {jex}", context.Key, jex);
             }
             catch (Exception ex)
             {
-                _logger.LogWarning($"Cannot set to DistributedCache with key: {context.Key} -> {ex}");
+                _logger.LogWarning("Cannot set to DistributedCache with key: {Key} -> {ex}", context.Key, ex);
             }
         }
     }

@@ -28,7 +28,7 @@ namespace CacheService.Background
             }
             catch (Exception ex)
             {
-                _logger.LogWarning($"Cannot set to DistributedCache with key: {Key} -> {ex}");
+                _logger.LogWarning("Cannot set to DistributedCache with key: {Key} -> {ex}", Key, ex);
             }
         }
     }
