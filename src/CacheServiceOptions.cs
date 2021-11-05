@@ -5,5 +5,7 @@
         public CacheOptions Distributed { get; set; } = new();
 
         public CacheOptions Memory { get; set; } = new();
+
+        public bool ForceRefresh { get; set; } = false;
     }
 }

@@ -23,7 +23,7 @@ namespace CacheService
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            options = options ?? _configuration.DefaultOption;
+            options ??= _configuration.DefaultOption;
 
             var context = new ChainContext<T>(key, options, getter, cancellationToken);
             return HandleAsync(context);
@@ -34,8 +34,9 @@ namespace CacheService
             cancellationToken.ThrowIfCancellationRequested();
 
             var options = new CacheServiceOptions();
-            options.Memory.AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(0);
-            options.Distributed.AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(0);
+            options.Memory.AbsoluteExpiration = DateTimeOffset.MinValue;
+            options.Distributed.AbsoluteExpiration = DateTimeOffset.MinValue;
+            options.ForceRefresh = true;
 
             var context = new ChainContext<object>(key, options, ct => ValueTask.FromResult<object?>(default), cancellationToken);
             return HandleAsync(context).AsTask();

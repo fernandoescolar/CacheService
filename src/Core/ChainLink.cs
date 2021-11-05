@@ -2,7 +2,7 @@ namespace CacheService.Core
 {
     public abstract class ChainLink : IChainLink
     {
-        private ushort _order;
+        private readonly ushort _order;
 
         protected ChainLink(ushort order)
         {
@@ -15,14 +15,15 @@ namespace CacheService.Core
 
         public async ValueTask<T?> HandleAsync<T>(ChainContext<T> context) where T : class
         {
-            context.Value = await OnGetAsync(context);
+            if (!context.Options.ForceRefresh)
+            {
+                context.Value = await OnGetAsync(context);
+            }
+
             if (context.Value is null && Next is not null)
             {
                 context.Value = await Next.HandleAsync(context);
-                if (context.Value is not null)
-                {
-                    await OnSetAsync(context);
-                }
+                await OnSetAsync(context);
             }
 
             return context.Value;
