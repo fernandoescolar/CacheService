@@ -31,7 +31,7 @@ namespace CacheService.Tests.Integration
 
             DistributedCache.Add(someKey, invalidValue);
 
-            var context = new ChainContext<DummyObject>(someKey, CacheServiceOptions.Default, someDummyObjectGetter, CancellationToken);
+            var context = new ChainContext<DummyObject>(someKey, new CacheServiceOptions(), someDummyObjectGetter, CancellationToken);
             var actual = await target.HandleAsync(context);
 
             Assert.Null(actual);
@@ -42,7 +42,7 @@ namespace CacheService.Tests.Integration
         {
             const string someKey = "whatever";
             var expected = new ErrorInSerialize();
-            var context = new ChainContext<ErrorInSerialize>(someKey, CacheServiceOptions.Default, ct => ValueTask.FromResult<ErrorInSerialize?>(default), CancellationToken);
+            var context = new ChainContext<ErrorInSerialize>(someKey, new CacheServiceOptions(), ct => ValueTask.FromResult<ErrorInSerialize?>(default), CancellationToken);
             target.Next = new DummyChainLink(expected);
 
 

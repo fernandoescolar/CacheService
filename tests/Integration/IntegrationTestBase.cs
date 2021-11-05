@@ -1,4 +1,5 @@
-﻿using CacheService.Tests.Doubles;
+﻿using CacheService.Configuration;
+using CacheService.Tests.Doubles;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
@@ -21,7 +22,7 @@ namespace CacheService.Tests.Integration
             services.AddLogging();
             services.AddSingleton<IMemoryCache>(MemoryCache);
             services.AddSingleton<IDistributedCache>(DistributedCache);
-            services.AddCacheService();
+            services.AddCacheService(OnConfigure);
 
             ServiceProvider = services.BuildServiceProvider();
             Target = ServiceProvider.GetRequiredService<ICacheService>();
@@ -57,6 +58,10 @@ namespace CacheService.Tests.Integration
             TestScope?.Cancel();
             TestScope?.Dispose();
             disposed = true;
+        }
+
+        protected virtual void OnConfigure(CacheServiceConfiguration configuration)
+        {
         }
     }
 }
