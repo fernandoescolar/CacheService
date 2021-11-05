@@ -16,7 +16,7 @@ namespace CacheService.Tests.Integration
         }
 
         [Fact]
-        public async Task UpdateMemoryCache()
+        public async Task Update_MemoryCache()
         {
             options.Memory.RefreshInterval = TimeSpan.FromSeconds(1);
 
@@ -27,7 +27,7 @@ namespace CacheService.Tests.Integration
         }
 
         [Fact]
-        public async Task UpdateDistributedCache()
+        public async Task Update_DistributedCache()
         {
             options.Distributed.RefreshInterval = TimeSpan.FromSeconds(1);
 
@@ -40,7 +40,7 @@ namespace CacheService.Tests.Integration
         }
 
         [Fact]
-        public async Task NotUpdateMemoryCache()
+        public async Task Not_Update_MemoryCache()
         {
             options.Memory.RefreshInterval = default;
 
@@ -51,7 +51,7 @@ namespace CacheService.Tests.Integration
         }
 
         [Fact]
-        public async Task NotUpdateDistributedCache()
+        public async Task Not_Update_DistributedCache()
         {
             options.Distributed.RefreshInterval = default;
 
