@@ -1,5 +1,6 @@
 using System.Threading.Tasks;
 using CacheService.Configuration;
+using CacheService.Tests.Doubles;
 using Xunit;
 
 namespace CacheService.Tests.Integration.Configuration

@@ -1,16 +1,17 @@
+﻿using CacheService.Configuration;
+using CacheService.Tests.Doubles;
 using System;
 using System.Threading.Tasks;
-using CacheService.Tests.Doubles;
 using Xunit;
 
 namespace CacheService.Tests.Integration
 {
-    public class JobHostedService_Should : IntegrationTestBase
+    public class JobTimer_Should : IntegrationTestBase
     {
         private readonly string key;
         private readonly CacheServiceOptions options;
 
-        public JobHostedService_Should()
+        public JobTimer_Should()
         {
             key = Guid.NewGuid().ToString();
             options = new CacheServiceOptions();
@@ -64,23 +65,22 @@ namespace CacheService.Tests.Integration
             Assert.Equal(expected, actual);
         }
 
+        protected override void OnConfigure(CacheServiceConfiguration configuration)
+        {
+            base.OnConfigure(configuration);
+            configuration.BackgroundJobMode = BackgroundJobMode.Timer;
+        }
+
         private async Task<DummyObject?> TestActAsync()
         {
-            await RunJobHostedServiceAsync();
+            await WaitTimerDoHisJob();
 
             return await Target.GetOrSetAsync(key, options, () => new DummyObject(), CancellationToken);
         }
 
-        private async Task RunJobHostedServiceAsync()
+        private async Task WaitTimerDoHisJob()
         {
-            if (JobHostedService is null)
-            {
-                throw new ArgumentNullException(nameof(JobHostedService));
-            }
-
-            await JobHostedService.StartAsync(CancellationToken);
             await Task.Delay(2500);
-            await JobHostedService.StopAsync(CancellationToken);
         }
     }
 }

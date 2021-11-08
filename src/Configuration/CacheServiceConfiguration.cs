@@ -8,6 +8,8 @@ namespace CacheService.Configuration
 
         public bool UseDistributedCache { get; set; } = true;
 
-        public bool UseJobHostedService { get; set; } = true;
+        public BackgroundJobMode BackgroundJobMode { get; set; } = BackgroundJobMode.HostedService;
+
+        public TimeSpan BackgroundJobInterval { get; set; } = TimeSpan.FromMinutes(1);
     }
 }

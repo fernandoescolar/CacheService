@@ -1,6 +1,6 @@
 using CacheService.Core;
 
-namespace CacheService.Background
+namespace CacheService.ChainLinks
 {
     internal class Source : ChainLink
     {

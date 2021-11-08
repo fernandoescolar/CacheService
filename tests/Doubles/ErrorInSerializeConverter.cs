@@ -2,7 +2,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace CacheService.Tests
+namespace CacheService.Tests.Doubles
 {
     public class ErrorInSerializeConverter : JsonConverter<ErrorInSerialize>
     {

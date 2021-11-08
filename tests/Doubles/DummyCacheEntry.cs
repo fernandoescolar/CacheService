@@ -3,7 +3,7 @@ using Microsoft.Extensions.Primitives;
 using System;
 using System.Collections.Generic;
 
-namespace CacheService.Tests
+namespace CacheService.Tests.Doubles
 {
     public class DummyCacheEntry : ICacheEntry
     {
@@ -21,7 +21,7 @@ namespace CacheService.Tests
         public DateTimeOffset? AbsoluteExpiration { get; set; }
 
         public TimeSpan? AbsoluteExpirationRelativeToNow { get; set; }
-        
+
         public TimeSpan? SlidingExpiration { get; set; }
 
         public IList<IChangeToken> ExpirationTokens { get; set; } = new List<IChangeToken>();

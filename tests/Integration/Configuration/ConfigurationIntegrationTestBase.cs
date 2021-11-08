@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using CacheService.Tests.Doubles;
 
 namespace CacheService.Tests.Integration.Configuration
 {
@@ -21,6 +22,11 @@ namespace CacheService.Tests.Integration.Configuration
 
         protected async Task RunJobHostedServiceAsync()
         {
+            if (JobHostedService is null)
+            {
+                throw new ArgumentNullException(nameof(JobHostedService));
+            }
+
             await JobHostedService.StartAsync(CancellationToken);
             await Task.Delay(2500);
             await JobHostedService.StopAsync(CancellationToken);

@@ -9,7 +9,7 @@ namespace CacheService.ChainLinks
 
         public IChainLink? Next { get; set; }
 
-        public ushort Order => 0;
+        public ushort Order => 1;
 
         public AddOrUpdateJob(IJobManager bgManager)
         {
@@ -19,7 +19,7 @@ namespace CacheService.ChainLinks
         public ValueTask<T?> HandleAsync<T>(ChainContext<T> context) where T : class
         {
             _bgManager.AddOrUpdateJob(context.Key, context.ValueGetter, context.Options);
-            
+
             if (Next is not null)
                 return Next.HandleAsync(context);
 

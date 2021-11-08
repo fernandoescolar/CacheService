@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace CacheService.Tests
+namespace CacheService.Tests.Doubles
 {
     public class DummyObject
     {

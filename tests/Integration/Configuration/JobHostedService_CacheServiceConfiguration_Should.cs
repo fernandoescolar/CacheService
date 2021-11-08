@@ -1,8 +1,9 @@
 using System;
 using System.Threading.Tasks;
+using CacheService.Tests.Doubles;
 using Xunit;
 
-namespace CacheService.Tests.Integration
+namespace CacheService.Tests.Integration.Configuration
 {
     public class JobHostedService_CacheServiceConfiruation_Should : IntegrationTestBase
     {
@@ -72,6 +73,11 @@ namespace CacheService.Tests.Integration
 
         private async Task RunJobHostedServiceAsync()
         {
+            if (JobHostedService is null)
+            {
+                throw new ArgumentNullException(nameof(JobHostedService));
+            }
+
             await JobHostedService.StartAsync(CancellationToken);
             await Task.Delay(2500);
             await JobHostedService.StopAsync(CancellationToken);

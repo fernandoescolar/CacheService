@@ -1,14 +1,14 @@
 ﻿using CacheService.Core;
 using System.Threading.Tasks;
 
-namespace CacheService.Tests
+namespace CacheService.Tests.Doubles
 {
     public class DummyChainLink : ChainLink
     {
         private readonly object? _value = default;
 
         public DummyChainLink(ushort order) : base(order)
-        { 
+        {
         }
 
         public DummyChainLink() : this(ushort.MaxValue)
