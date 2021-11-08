@@ -1,5 +1,6 @@
 using System.Linq;
 using CacheService.ChainLinks;
+using CacheService.Configuration;
 using CacheService.Core;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -53,7 +54,7 @@ namespace CacheService.Tests.Integration.Configuration
         public void Register_AddOrUpdateJob_ChainLink_When_It_Is_Required()
         {
             var services = new ServiceCollection();
-            services.AddCacheService(op => op.UseJobHostedService = true);
+            services.AddCacheService(op => op.BackgroundJobMode = BackgroundJobMode.HostedService);
 
             var actual = services.Any(x => x.ServiceType == typeof(IChainLink) && x.ImplementationType == typeof(AddOrUpdateJob));
             Assert.True(actual);
@@ -63,7 +64,7 @@ namespace CacheService.Tests.Integration.Configuration
         public void Not_Register_AddOrUpdateJob_ChainLink_When_It_Is_Required()
         {
             var services = new ServiceCollection();
-            services.AddCacheService(op => op.UseJobHostedService = false);
+            services.AddCacheService(op => op.BackgroundJobMode = BackgroundJobMode.None);
 
             var actual = services.Any(x => x.ServiceType == typeof(IChainLink) && x.ImplementationType == typeof(AddOrUpdateJob));
             Assert.False(actual);
@@ -73,7 +74,7 @@ namespace CacheService.Tests.Integration.Configuration
         public void Register_JobHostedService_ChainLink_When_It_Is_Required()
         {
             var services = new ServiceCollection();
-            services.AddCacheService(op => op.UseJobHostedService = true);
+            services.AddCacheService(op => op.BackgroundJobMode = BackgroundJobMode.HostedService);
 
             var actual = services.Any(x => x.ServiceType == typeof(IHostedService));
             Assert.True(actual);
@@ -83,7 +84,7 @@ namespace CacheService.Tests.Integration.Configuration
         public void Not_Register_JobHostedService_ChainLink_When_It_Is_Required()
         {
             var services = new ServiceCollection();
-            services.AddCacheService(op => op.UseJobHostedService = false);
+            services.AddCacheService(op => op.BackgroundJobMode = BackgroundJobMode.None);
 
             var actual = services.Any(x => x.ServiceType == typeof(IHostedService));
             Assert.False(actual);

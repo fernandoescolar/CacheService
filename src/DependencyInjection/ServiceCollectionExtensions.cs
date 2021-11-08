@@ -31,15 +31,25 @@ namespace Microsoft.Extensions.DependencyInjection
                 services.AddTransient<IChainLink, Distributed>();
             }
 
-            if (configuration.UseJobHostedService)
+            if (configuration.BackgroundJobMode != BackgroundJobMode.None)
             {
-                services.AddCacheServiceBackground();
+                services.AddBackgroundJobDependencies();
+            }
+
+            if (configuration.BackgroundJobMode == BackgroundJobMode.HostedService)
+            {
+                services.AddBackgroundJobHostedService();
+            }
+
+            if (configuration.BackgroundJobMode == BackgroundJobMode.Timer)
+            {
+                services.AddBackgroundJobTimer();
             }
 
             return services;
         }
 
-        private static IServiceCollection AddCacheServiceBackground(this IServiceCollection services)
+        private static IServiceCollection AddBackgroundJobDependencies(this IServiceCollection services)
         {
             services.AddTransient<IChainLink, AddOrUpdateJob>();
 
@@ -49,8 +59,16 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddSingleton<DistributedCacheFactory>(s => () => s.GetRequiredService<IDistributedCache>());
             services.AddSingleton<CacheSerializerFactory>(s => () => s.GetRequiredService<ICacheSerializer>());
 
-            services.AddHostedService<JobHostedService>();
+            return services;
+        }
 
+        private static IServiceCollection AddBackgroundJobHostedService(this IServiceCollection services)
+            => services.AddHostedService<JobHostedService>();
+
+        private static IServiceCollection AddBackgroundJobTimer(this IServiceCollection services)
+        {
+            services.AddSingleton<IChainLink, StartJobTimer>();
+            services.AddSingleton<JobTimer>();
             return services;
         }
     }

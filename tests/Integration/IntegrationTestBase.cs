@@ -27,7 +27,7 @@ namespace CacheService.Tests.Integration
             ServiceProvider = services.BuildServiceProvider();
             Target = ServiceProvider.GetRequiredService<ICacheService>();
             Serializer = ServiceProvider.GetRequiredService<ICacheSerializer>();
-            JobHostedService = ServiceProvider.GetRequiredService<IHostedService>();
+            JobHostedService = ServiceProvider.GetService<IHostedService>();
             TestScope = new CancellationTokenSource();
         }
 
@@ -37,7 +37,7 @@ namespace CacheService.Tests.Integration
 
         protected ICacheSerializer Serializer { get; private set; }
 
-        protected IHostedService JobHostedService { get; private set; }
+        protected IHostedService? JobHostedService { get; private set; }
 
         protected DummyMemoryCache MemoryCache { get; private set; }
 

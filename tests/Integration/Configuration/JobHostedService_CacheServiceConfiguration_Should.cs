@@ -73,6 +73,11 @@ namespace CacheService.Tests.Integration
 
         private async Task RunJobHostedServiceAsync()
         {
+            if (JobHostedService is null)
+            {
+                throw new ArgumentNullException(nameof(JobHostedService));
+            }
+
             await JobHostedService.StartAsync(CancellationToken);
             await Task.Delay(2500);
             await JobHostedService.StopAsync(CancellationToken);
