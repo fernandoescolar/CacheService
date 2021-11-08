@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using CacheService.Configuration;
 
 namespace CacheService.Tests.Integration.Configuration
 {

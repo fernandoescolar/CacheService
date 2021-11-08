@@ -62,6 +62,7 @@ namespace CacheService.Tests.Integration
 
         protected virtual void OnConfigure(CacheServiceConfiguration configuration)
         {
+            configuration.BackgroundJobInterval = TimeSpan.FromSeconds(1);
         }
     }
 }
