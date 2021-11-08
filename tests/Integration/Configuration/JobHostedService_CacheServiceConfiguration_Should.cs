@@ -1,9 +1,9 @@
 using System;
 using System.Threading.Tasks;
-using CacheService.Configuration;
+using CacheService.Tests.Doubles;
 using Xunit;
 
-namespace CacheService.Tests.Integration
+namespace CacheService.Tests.Integration.Configuration
 {
     public class JobHostedService_CacheServiceConfiruation_Should : IntegrationTestBase
     {
