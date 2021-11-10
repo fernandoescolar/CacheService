@@ -1,11 +1,25 @@
-namespace CacheService.Core
+namespace CacheService.Core;
+
+/// <summary>
+/// ChainLink inside the Chain Of Responsibility pattern.
+/// </summary>
+public interface IChainLink
 {
-    public interface IChainLink
-    {
-        ushort Order { get; }
+    /// <summary>
+    /// Order of the ChainLink inside the chain.
+    /// </summary>
+    ushort Order { get; }
 
-        IChainLink? Next { get; set; }
+    /// <summary>
+    /// Next ChainLink in the chain.
+    /// </summary>
+    IChainLink? Next { get; set; }
 
-        ValueTask<T?> HandleAsync<T>(ChainContext<T> context) where T: class;
-    }
+    /// <summary>
+    /// Executes the ChainLink.
+    /// </summary>
+    /// <typeparam name="T">The type os the value to process in the chain.</typeparam>
+    /// <param name="context">The execution context.</param>
+    /// <returns>The value get in the process.</returns>
+    ValueTask<T?> HandleAsync<T>(ChainContext<T> context) where T : class;
 }

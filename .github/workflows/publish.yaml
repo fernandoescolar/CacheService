@@ -80,7 +80,7 @@ jobs:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           release-tag: ${{ steps.vars.outputs.tag }}
   cleanup:
-    needs: release
+    needs: [ nugets, release ]
     runs-on: ubuntu-latest
     steps:
       - uses: geekyeggo/delete-artifact@v1

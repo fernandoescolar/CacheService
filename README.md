@@ -1,58 +1,122 @@
 # CacheService
 
-Doble layer cache for dotnet
+CacheService is a simple and fast double layer cache service for dotnet core.
 
 ## Features
 
-Workflow `GetOrSet()`:
-1. Read from MemoryCache
-2. Read from DistributedCache (and set in MemoryCache)
-3. Read from source (and set in MemoryCache and DistributedCache)
+The main idea is to have an in memory cache and a distributed cache, both managed by a single service: `ICacheService`.
 
-In background:
-1. All values read from any source or cache should automatically updated in background in an specified time
+This service have the `GetOrSetAsync()` method and it should:
+1. Read from MemoryCache (if exists return the read value)
+2. Read from DistributedCache (if exists return the read value) and then set it in MemoryCache
+3. Read from source (if not exists return `null`) and then set in MemoryCache and DistributedCache.
+
+And to have a way to automatically update the cache in background:
+- All values read from any source or cache should automatically updated in background in an specified time.
 
 ## Quick Start
+
+Before using this library, you need to install the NuGet package:
 
 ```bash
 dotnet package add CacheService
 ```
+CacheService has some dependencies should be already registered in your application: `ILoggerFactory`, `IMemoryCache` and `IDistributed`. As an example:
 
 ```csharp
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Caching.StackExchangeRedis;
+
 // dependencies
 services.AddLogging();
 services.AddMemoryCache();
-services.AddRedisDistributedCache(op => op.ConnectionString = "");
+services.AddStackExchangeRedisCache(op => ...);
+```
 
+Next, to use the CacheService you need to add the following line in the startup file:
+
+```csharp
 // register cache service
 services.AddCacheService();
 ```
 
+Finally you can use the `ICacheService` in your methods getting the cache from the `ServiceProvider`:
+
 ```csharp
 var cache = serviceProvider.GetRequiredService<ICacheService>();
-
-var myCachedValue = cache.GetorUpdateAsync("dome-key", cancellationToken => GetValueFromDatabaseAsync(cancellationToken), cancellationToken);
+var myCachedValue = cache.GetOrSetAsync("some-key", ct => GetValueFromDatabaseAsync(ct), cancellationToken);
 ```
-## Use
 
-```chsarp
- var services = new ServiceCollection();
+Or in any Asp.Net Core MVC controller:
 
-services.AddLogging();
+```csharp
+public WeatherForecastController(ICacheService cache)
+{
+    _cache = cache;
+}
 
-services.AddSingleton<IMemoryCache>(MemoryCache);
-services.AddSingleton<IDistributedCache>(DistributedCache);
+[HttpGet(Name = "GetWeatherForecast")]
+public async Task<IActionResult> GetAsync()
+{
+    var model = await _cache.GetOrSetAsync("forecast", ct => GetFromDatabaseAsync(ct), HttpContext.RequestAborted);
+    return Ok(model);
+}
+```
 
-services.AddCacheService();
+## ICacheService
+
+The main `ICacheService` method is `GetOrSetAsync`. It allows you to get a value from the cache or set a new value in the cache:
+
+```csharp
+ValueTask<T> GetOrSetAsync<T>(string key, CacheServiceOptions options, Func<CancellationToken, ValueTask<T>> getter, CancellationToken cancellationToken = default);
+```
+
+The parameters are:
+| Parameter | Mandatory | Description | Type |
+| --------- | ---------- | ----------- | ---- |
+| key | Yes | The cache key | `string` |
+| options | No | The `CacheServiceOptions` to use | `CacheServiceOptions` |
+| getter | Yes | The function to get the value from the source | `Func<CancellationToken, ValueTask<T>>` |
+| cancellationToken | No | The cancellation token | `CancellationToken` |
+
+### CacheServiceOptions
+
+`CacheServiceOptions` is a class that contains the options to use in the `ICacheService` methods. It has the following properties:
+
+| Property | Description | Type |
+| -------- | ----------- | ---- |
+| Memory | Sets the configuration for the in memory cache | `CacheOptions` |
+| Distributed | Sets the configuration for the distributed cache | `CacheOptions` |
+| ForceRefresh | Sets if you want to force the refresh of the cache value | `bool` |
+
+### CacheOptions
+
+`CacheOptions` is a class that contains the options to use in each configured kind of cache. It has the following properties:
+
+| Property | Description | Type | Default |
+| -------- | ----------- | ---- | ------- |
+| AbsoluteExpiration | Sets an absolute expiration date for the cache entry | `DateTimeOffset` | `null` |
+| AbsoluteExpirationRelativeToNow | Sets an absolute expiration date relative to now for the cache entry | `TimeSpan` | `null` |
+| SlidingExpiration | sets how long a cache entry can be inactive (e.g. not accessed) before it will be removed. This will not extend the entry lifetime beyond the absolute expiration (if set) | `TimeSpan` | `null` |
+| RefreshInterval | Sets the interval to automatically refresh the cache value | `TimeSpan` | `null` |
+
+
+## Configuration
+
+You can add the cache service to the `services` collection:
+
+```csharp
 services.AddCacheService(op => ...);
 ```
 
-```chsarp
-services.AddMemoryCache();
-services.AddRedisDistributedCache(op => ...);
-services.AddCacheService(op => ...);
+And you can configure the `ICacheService` with the following options:
 
-```
+- `DefaultOptions`: Sets the `CacheServiceOptions` to use by default in `ICacheService.GetOrSetAsync` method.
+- `UseMemoryCache`: Sets if you want to manage `IMemoryCache` with `ICacheService`. Default is `true`.
+- `UseDistributedCache`: Sets if you want to manage `IDistributedCache` with `ICacheService`. Default is `true`.
+- `BackgroundJobMode`: Sets how you want to use the background process to automatically update your cache values. Options are: `None`, `HostedService` or `Timer`.  Default is `HostedService`.
+- `BackgroundJobInterval`: Sets the background process execution interval. Default is `TimeSpan.FromMinutes(1)`.
 
 ## License
 

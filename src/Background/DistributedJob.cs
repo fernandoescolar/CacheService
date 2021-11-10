@@ -1,35 +1,32 @@
-﻿using Microsoft.Extensions.Logging;
+﻿namespace CacheService.Background;
 
-namespace CacheService.Background
+internal class DistributedJob<T> : Job<T>
 {
-    internal class DistributedJob<T> : Job<T>
+    private readonly DistributedCacheFactory _factory;
+    private readonly CacheSerializerFactory _serializerFactory;
+    private readonly ILogger<DistributedJob<T>> _logger;
+
+    public DistributedJob(DistributedCacheFactory distributedFactory, CacheSerializerFactory serializerFactory, JobParameters<T> parameters, ILogger<DistributedJob<T>> logger)
+        : base(parameters)
     {
-        private readonly DistributedCacheFactory _factory;
-        private readonly CacheSerializerFactory _serializerFactory;
-        private readonly ILogger<DistributedJob<T>> _logger;
+        _factory = distributedFactory;
+        _serializerFactory = serializerFactory;
+        _logger = logger;
+    }
 
-        public DistributedJob(DistributedCacheFactory distributedFactory, CacheSerializerFactory serializerFactory, JobParameters<T> parameters, ILogger<DistributedJob<T>> logger)
-            : base(parameters)
+    protected override async Task OnExecuteAsync(CancellationToken cancellationToken)
+    {
+        var value = await ValueGetter(cancellationToken);
+
+        try
         {
-            _factory = distributedFactory;
-            _serializerFactory = serializerFactory;
-            _logger = logger;
+            var distributedCache = _factory();
+            var bytes = await _serializerFactory().SerializeAsync(value, cancellationToken);
+            await distributedCache.SetAsync(Key, bytes, Options, cancellationToken);
         }
-
-        protected override async Task OnExecuteAsync(CancellationToken cancellationToken)
+        catch (Exception ex)
         {
-            var value = await ValueGetter(cancellationToken);
-
-            try
-            {
-                var distributedCache = _factory();
-                var bytes = await _serializerFactory().SerializeAsync(value, cancellationToken);
-                await distributedCache.SetAsync(Key, bytes, Options, cancellationToken);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning("Cannot set to DistributedCache with key: {Key} -> {ex}", Key, ex);
-            }
+            _logger.LogWarning("Cannot set to DistributedCache with key: {Key} -> {ex}", Key, ex);
         }
     }
 }

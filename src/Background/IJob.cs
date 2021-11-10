@@ -1,11 +1,10 @@
-﻿namespace CacheService.Background
+﻿namespace CacheService.Background;
+
+internal interface IJob
 {
-    internal interface IJob
-    { 
-        DateTime? DueTime { get; }
+    DateTime? DueTime { get; }
 
-        Task ExecuteAsync(CancellationToken cancellationToken);
+    Task ExecuteAsync(CancellationToken cancellationToken);
 
-        IJob UpdateJob(IJob otherJob);
-    }
+    IJob UpdateJob(IJob otherJob);
 }
