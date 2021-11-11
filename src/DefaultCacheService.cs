@@ -32,7 +32,9 @@ internal sealed class DefaultCacheService : ChainOfResponsibility, ICacheService
 
         var options = new CacheServiceOptions();
         options.Memory.AbsoluteExpiration = DateTimeOffset.MinValue;
+        options.Memory.RefreshInterval = null;
         options.Distributed.AbsoluteExpiration = DateTimeOffset.MinValue;
+        options.Distributed.RefreshInterval = null;
         options.ForceRefresh = true;
 
         var context = new ChainContext<object>(key, options, ct => ValueTask.FromResult<object?>(default), cancellationToken);

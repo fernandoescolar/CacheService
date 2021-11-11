@@ -2,7 +2,7 @@
 
 internal abstract class Job<T> : IJob
 {
-    private const int TenYears = 36500;
+    private const int OneHundredYearInDays = 36500;
 
     public string Key { get; init; }
 
@@ -49,6 +49,6 @@ internal abstract class Job<T> : IJob
 
     private void UpdateDueTime(CacheOptions options)
     {
-        DueTime = DateTime.UtcNow + (options.RefreshInterval ?? TimeSpan.FromDays(TenYears));
+        DueTime = DateTime.UtcNow + (options.RefreshInterval ?? TimeSpan.FromDays(OneHundredYearInDays));
     }
 }
