@@ -22,7 +22,7 @@ namespace CacheService.Tests.Integration.Configuration
         protected override void OnConfigure(CacheServiceConfiguration configuration)
         {
             base.OnConfigure(configuration);
-            configuration.DefaultOption.Distributed.RefreshInterval = TimeSpan.FromSeconds(1);
+            configuration.DefaultOptions.Distributed.RefreshInterval = TimeSpan.FromSeconds(1);
         }
     }
 }

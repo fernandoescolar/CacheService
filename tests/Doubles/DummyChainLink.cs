@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace CacheService.Tests.Doubles
 {
-    public class DummyChainLink : ChainLink
+    internal class DummyChainLink : ChainLink
     {
         private readonly object? _value = default;
 

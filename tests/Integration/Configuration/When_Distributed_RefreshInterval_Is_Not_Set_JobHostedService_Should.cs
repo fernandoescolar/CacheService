@@ -21,7 +21,7 @@ namespace CacheService.Tests.Integration.Configuration
         protected override void OnConfigure(CacheServiceConfiguration configuration)
         {
             base.OnConfigure(configuration);
-            configuration.DefaultOption.Distributed.RefreshInterval = default;
+            configuration.DefaultOptions.Distributed.RefreshInterval = default;
         }
     }
 }

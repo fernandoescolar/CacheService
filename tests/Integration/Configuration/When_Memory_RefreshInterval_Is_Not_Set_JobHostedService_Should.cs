@@ -19,7 +19,7 @@ namespace CacheService.Tests.Integration.Configuration
         protected override void OnConfigure(CacheServiceConfiguration configuration)
         {
             base.OnConfigure(configuration);
-            configuration.DefaultOption.Memory.RefreshInterval = default;
+            configuration.DefaultOptions.Memory.RefreshInterval = default;
         }
     }
 }

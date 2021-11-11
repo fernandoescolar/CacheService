@@ -1,57 +1,54 @@
-﻿namespace CacheService.Background
+﻿namespace CacheService.Background;
+
+internal abstract class Job<T> : IJob
 {
-    internal record JobParameters<T>(string Key, CacheOptions Options, Func<CancellationToken, ValueTask<T?>> ValueGetter);
+    private const int TenYears = 36500;
 
-    internal abstract class Job<T> : IJob
+    public string Key { get; init; }
+
+    public CacheOptions Options { get; protected set; }
+
+    public Func<CancellationToken, ValueTask<T?>> ValueGetter { get; protected set; }
+
+    public Job(JobParameters<T> parameters)
     {
-        private const int TenYears = 36500;
+        Key = parameters.Key;
+        Options = parameters.Options;
+        ValueGetter = parameters.ValueGetter;
 
-        public string Key { get; init; }
+        UpdateDueTime(Options);
+    }
 
-        public CacheOptions Options { get; protected set; }
+    public DateTime? DueTime { get; protected set; }
 
-        public Func<CancellationToken, ValueTask<T?>> ValueGetter { get; protected set; }
+    public async Task ExecuteAsync(CancellationToken cancellationToken)
+    {
+        await OnExecuteAsync(cancellationToken);
+        UpdateDueTime(Options);
+    }
 
-        public Job(JobParameters<T> parameters)
+    public IJob UpdateJob(IJob otherJob)
+    {
+        var j = otherJob as Job<T>;
+        if (j is null)
         {
-            Key = parameters.Key;
-            Options = parameters.Options;
-            ValueGetter = parameters.ValueGetter;
-
-            UpdateDueTime(Options);
+            throw new InvalidOperationException($"otherJob doesn't is a JobDetails<{typeof(T).Name}>");
         }
 
-        public DateTime? DueTime { get; protected set; }
+        return UpdateJob(j);
+    }
 
-        public async Task ExecuteAsync(CancellationToken cancellationToken)
-        {
-            await OnExecuteAsync(cancellationToken);
-            UpdateDueTime(Options);
-        }
+    public Job<T> UpdateJob(Job<T> otherJob)
+    {
+        Options = otherJob.Options;
+        ValueGetter = otherJob.ValueGetter;
+        return this;
+    }
 
-        public IJob UpdateJob(IJob otherJob)
-        {
-            var j = otherJob as Job<T>;
-            if (j is null)
-            {
-                throw new InvalidOperationException($"otherJob doesn't is a JobDetails<{typeof(T).Name}>");
-            }
+    protected abstract Task OnExecuteAsync(CancellationToken cancellationToken);
 
-            return UpdateJob(j);
-        }
-
-        public Job<T> UpdateJob(Job<T> otherJob)
-        {
-            Options = otherJob.Options;
-            ValueGetter = otherJob.ValueGetter;
-            return this;
-        }
-
-        protected abstract Task OnExecuteAsync(CancellationToken cancellationToken);
-
-        private void UpdateDueTime(CacheOptions options)
-        {
-            DueTime = DateTime.UtcNow + (options.RefreshInterval ?? TimeSpan.FromDays(TenYears));
-        }
+    private void UpdateDueTime(CacheOptions options)
+    {
+        DueTime = DateTime.UtcNow + (options.RefreshInterval ?? TimeSpan.FromDays(TenYears));
     }
 }

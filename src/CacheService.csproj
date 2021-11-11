@@ -12,6 +12,7 @@
     <Description>Doble layer cache for dotnet.</Description>
     <PackageProjectUrl>https://github.com/fernandoescolar/CacheService</PackageProjectUrl>
     <PackageIcon>icon.png</PackageIcon>
+    <LangVersion>10</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>

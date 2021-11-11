@@ -1,33 +1,30 @@
-﻿using System.Text.Json;
+﻿namespace CacheService;
 
-namespace CacheService
+internal class DefaultCacheSerializer : ICacheSerializer
 {
-    internal class DefaultCacheSerializer : ICacheSerializer
+    private static readonly JsonSerializerOptions _jsonSerializerOptions = new();
+
+    public async Task<T?> DeserializeAsync<T>(byte[] bytes, CancellationToken cancellationToken)
     {
-        private static readonly JsonSerializerOptions _jsonSerializerOptions = new();
-
-        public async Task<T?> DeserializeAsync<T>(byte[] bytes, CancellationToken cancellationToken)
+        if (bytes is null || bytes.Length == 0)
         {
-            if (bytes is null || bytes.Length == 0)
-            {
-                return default;
-            }
-
-            using var ms = new MemoryStream(bytes);
-            var result = await JsonSerializer.DeserializeAsync<T>(ms, _jsonSerializerOptions, cancellationToken);
-            return result;
+            return default;
         }
 
-        public async Task<byte[]?> SerializeAsync<T>(T value, CancellationToken cancellationToken)
-        {
-            if (value is null)
-            { 
-                return null;
-            }
+        using var ms = new MemoryStream(bytes);
+        var result = await JsonSerializer.DeserializeAsync<T>(ms, _jsonSerializerOptions, cancellationToken);
+        return result;
+    }
 
-            using var ms = new MemoryStream();
-            await JsonSerializer.SerializeAsync(ms, value, _jsonSerializerOptions, cancellationToken);
-            return ms.ToArray();
+    public async Task<byte[]?> SerializeAsync<T>(T value, CancellationToken cancellationToken)
+    {
+        if (value is null)
+        {
+            return null;
         }
+
+        using var ms = new MemoryStream();
+        await JsonSerializer.SerializeAsync(ms, value, _jsonSerializerOptions, cancellationToken);
+        return ms.ToArray();
     }
 }

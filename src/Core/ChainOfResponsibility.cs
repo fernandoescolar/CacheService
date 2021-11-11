@@ -1,29 +1,28 @@
-namespace CacheService.Core
+namespace CacheService.Core;
+
+internal abstract class ChainOfResponsibility
 {
-    internal abstract class ChainOfResponsibility
+    private readonly List<IChainLink> _links = new();
+
+    public ValueTask<T?> HandleAsync<T>(ChainContext<T> context) where T : class
     {
-        private readonly List<IChainLink> _links = new();
-
-        public ValueTask<T?> HandleAsync<T>(ChainContext<T> context) where T: class
+        var first = _links.FirstOrDefault();
+        if (first is null)
         {
-            var first = _links.FirstOrDefault();
-            if (first is null)
-            {
-                return ValueTask.FromResult<T?>(default);
-            }
-
-            return first.HandleAsync(context);
+            return ValueTask.FromResult<T?>(default);
         }
 
-        public void AddLink(IChainLink link)
-        {
-            var last = _links.LastOrDefault();
-            if (last is not null)
-            {
-                last.Next = link;
-            }
+        return first.HandleAsync(context);
+    }
 
-            _links.Add(link);
+    public void AddLink(IChainLink link)
+    {
+        var last = _links.LastOrDefault();
+        if (last is not null)
+        {
+            last.Next = link;
         }
+
+        _links.Add(link);
     }
 }
