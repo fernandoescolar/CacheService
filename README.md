@@ -11,16 +11,18 @@ This service have the `GetOrSetAsync()` method and it should:
 2. Read from DistributedCache (if exists return the read value) and then set it in MemoryCache
 3. Read from source (if not exists return `null`) and then set in MemoryCache and DistributedCache.
 
-And to have a way to automatically update the cache in background:
-- All values read from any source or cache should automatically updated in background in an specified time.
+And all values read from any source or cache should be automatically refreshed in the background at a specified time.
+
+![Workflow](doc/workflow.png)
 
 ## Quick Start
 
 Before using this library, you need to install the NuGet package:
 
 ```bash
-dotnet package add CacheService
+dotnet add package CacheService
 ```
+
 CacheService has some dependencies should be already registered in your application: `ILoggerFactory`, `IMemoryCache` and `IDistributed`. As an example:
 
 ```csharp
@@ -112,11 +114,13 @@ services.AddCacheService(op => ...);
 
 And you can configure the `ICacheService` with the following options:
 
-- `DefaultOptions`: Sets the `CacheServiceOptions` to use by default in `ICacheService.GetOrSetAsync` method.
-- `UseMemoryCache`: Sets if you want to manage `IMemoryCache` with `ICacheService`. Default is `true`.
-- `UseDistributedCache`: Sets if you want to manage `IDistributedCache` with `ICacheService`. Default is `true`.
-- `BackgroundJobMode`: Sets how you want to use the background process to automatically update your cache values. Options are: `None`, `HostedService` or `Timer`.  Default is `HostedService`.
-- `BackgroundJobInterval`: Sets the background process execution interval. Default is `TimeSpan.FromMinutes(1)`.
+| Property | Description | Type | Default |
+| -------- | ----------- | ---- | ------- |
+| DefaultOptions | Sets the default options to use in the `ICacheService` methods | `CacheServiceOptions` | |
+| UseMemoryCache | Sets if you want to manage `IMemoryCache` with `ICacheService` | `bool` | `true` |
+| UseDistributedCache | Sets if you want to manage `IDistributedCache` with `ICacheService` | `bool` | `true` |
+| BackgroundJobMode | Sets how you want to use the background process to automatically update your cache values<br/>*Options are: `None`, `HostedService` or `Timer`* | `BackgroundJobMode` | `BackgroundJobMode.HostedService` |
+| BackgroundJobInterval | Sets the background process to update cache value execution interval | `TimeSpan` | `TimeSpan.FromMinutes(1)` |
 
 ## License
 
