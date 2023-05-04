@@ -12,6 +12,8 @@
     <Description>Doble layer cache for dotnet.</Description>
     <PackageProjectUrl>https://github.com/fernandoescolar/CacheService</PackageProjectUrl>
     <PackageIcon>icon.png</PackageIcon>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <LangVersion>10</LangVersion>
   </PropertyGroup>
 
@@ -28,7 +30,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="../LICENSE" Pack="true" PackagePath="$(PackageLicenseFile)" />
+     <None Include="..\README.md" Pack="true" PackagePath="" />
+    <None Include="..\LICENSE" Pack="true" PackagePath="" />
     <None Include="icon.png" Pack="true" PackagePath="" />
   </ItemGroup>
 </Project>
