@@ -10,7 +10,7 @@ jobs:
   build:
     strategy:
       matrix:
-        agent: [ 'windows-latest', 'ubuntu-latest', 'macos-latest' ]         
+        agent: [ 'windows-latest', 'ubuntu-latest', 'macos-latest' ]
 
     runs-on: ${{ matrix.agent }}
     name: Integration in ${{matrix.agent}}
@@ -19,7 +19,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: '6.0.x'
+          dotnet-version: '7.0.x'
           include-prerelease: true
       - name: Restore dependencies
         run: dotnet restore
