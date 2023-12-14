@@ -95,7 +95,7 @@ namespace CacheService.Tests.Integration
 
             await Target.InvalidateAsync(key, CancellationToken);
 
-            Assert.Null(DistributedCache[key]);
+            Assert.Empty(DistributedCache[key]);
         }
     }
 }

@@ -12,14 +12,18 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      - name: Setup .NET
+      - name: Setup .NET 6
         uses: actions/setup-dotnet@v1
         with:
           dotnet-version: '6.0.x'
-      - name: Setup .NET
+      - name: Setup .NET 7
         uses: actions/setup-dotnet@v1
         with:
           dotnet-version: '7.0.x'
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '8.0.x'
       - name: Build
         run: dotnet build src/CacheService.csproj
       - name: Test

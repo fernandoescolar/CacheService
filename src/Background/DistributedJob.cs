@@ -21,7 +21,7 @@ internal class DistributedJob<T> : Job<T>
         try
         {
             var distributedCache = _factory();
-            var bytes = await _serializerFactory().SerializeAsync(value, cancellationToken);
+            var bytes = await _serializerFactory().SerializeAsync(value, cancellationToken)?? Array.Empty<byte>();
             await distributedCache.SetAsync(Key, bytes, Options, cancellationToken);
         }
         catch (Exception ex)

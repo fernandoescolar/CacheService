@@ -6,7 +6,7 @@ internal class Distributed : ChainLink
     private readonly ICacheSerializer _serializer;
     private readonly ILogger<Distributed> _logger;
 
-    public Distributed(IDistributedCache distributedCache, ICacheSerializer serializer, ILogger<Distributed> logger) 
+    public Distributed(IDistributedCache distributedCache, ICacheSerializer serializer, ILogger<Distributed> logger)
         : base(20)
     {
         _distributedCache = distributedCache;
@@ -40,7 +40,7 @@ internal class Distributed : ChainLink
     {
         try
         {
-            var bytes = await _serializer.SerializeAsync(context.Value, context.CancellationToken);
+            var bytes = await _serializer.SerializeAsync(context.Value, context.CancellationToken) ?? Array.Empty<byte>();
             await _distributedCache.SetAsync(context.Key, bytes, context.Options.Distributed, context.CancellationToken);
         }
         catch(JsonException jex)

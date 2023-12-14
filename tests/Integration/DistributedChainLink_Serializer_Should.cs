@@ -21,7 +21,9 @@ namespace CacheService.Tests.Integration
         }
 
         [Theory]
+#pragma warning disable xUnit1012 // Null should only be used for nullable parameters
         [InlineData(default(byte[]))]
+#pragma warning restore xUnit1012 // Null should only be used for nullable parameters
         [InlineData(new byte[0])]
         [InlineData(new byte[] { 105, 110, 118, 97, 108, 105, 100, 32, 106, 115, 111, 110 })] // "invalid json"
         public async Task Not_Throw_an_exception_When_distributed_cache_returns_invalid_values(byte[] invalidValue)
