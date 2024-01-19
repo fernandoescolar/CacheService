@@ -13,7 +13,7 @@ internal abstract class ChainLink : IChainLink
 
     public ushort Order => _order;
 
-    public async ValueTask<T?> HandleAsync<T>(ChainContext<T> context) where T : class
+    public virtual async ValueTask<T?> HandleAsync<T>(ChainContext<T> context) where T : class
     {
         if (!context.Options.ForceRefresh)
         {
