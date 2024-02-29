@@ -40,6 +40,12 @@ internal class Distributed : ChainLink
     {
         try
         {
+            if (IsInvalidateAction(context))
+            {
+                await _distributedCache.RemoveAsync(context.Key, context.CancellationToken);
+                return;
+            }
+
             var bytes = await _serializer.SerializeAsync(context.Value, context.CancellationToken) ?? Array.Empty<byte>();
             await _distributedCache.SetAsync(context.Key, bytes, context.Options.Distributed, context.CancellationToken);
         }
@@ -52,4 +58,9 @@ internal class Distributed : ChainLink
             _logger.LogWarning("Cannot set to DistributedCache with key: {Key} -> {ex}", context.Key, ex);
         }
     }
+
+    private static bool IsInvalidateAction<T>(ChainContext<T> context)
+        => context.Options.ForceRefresh
+        && context.Options.Distributed.AbsoluteExpiration <= DateTimeOffset.UtcNow
+        && context.Value is null;
 }
