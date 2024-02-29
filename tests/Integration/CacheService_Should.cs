@@ -85,7 +85,7 @@ namespace CacheService.Tests.Integration
 
             await Target.InvalidateAsync(key, CancellationToken);
 
-            Assert.Null(MemoryCache[key].Value);
+            Assert.False(MemoryCache.ContainsKey(key));
         }
 
         [Fact]
@@ -95,7 +95,7 @@ namespace CacheService.Tests.Integration
 
             await Target.InvalidateAsync(key, CancellationToken);
 
-            Assert.Empty(DistributedCache[key]);
+            Assert.False(DistributedCache.ContainsKey(key));
         }
     }
 }
