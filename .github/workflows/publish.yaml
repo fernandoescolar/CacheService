@@ -52,6 +52,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: nupkg
+          path: ./nupkg
       - name: Setup .NET Core
         uses: actions/setup-dotnet@v4
         with:
@@ -59,7 +60,6 @@ jobs:
           include-prerelease: true
       - name: Publish NuGet packages
         run: |
-          cd CacheService
           dotnet nuget push ./nupkg/*.nupkg -k ${{ secrets.NUGET_KEY }} -s https://api.nuget.org/v3/index.json
   release:
     needs: pack
@@ -70,6 +70,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: nupkg
+          path: ./nupkg
       - name: Get Version
         id: vars
         run: echo ::set-output name=tag::${GITHUB_REF#refs/*/}
@@ -84,7 +85,7 @@ jobs:
           prerelease: false
       - uses: AButler/upload-release-assets@v2.0
         with:
-          files: 'CacheService/nupkg/*.*'
+          files: 'nupkg/*.*'
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           release-tag: ${{ steps.vars.outputs.tag }}
   cleanup:
