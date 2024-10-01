@@ -38,7 +38,7 @@ jobs:
           VERSION_SUFFIX="${ARRAY_VERSION[1]}"
           dotnet pack -c Release -o nupkg ./src/CacheService.csproj -p:AssemblyVersion=$VERSION -p:VersionPrefix=$VERSION -p:VersionSuffix=$VERSION_SUFFIX -p:IncludeSymbols=true -p:SymbolPackageFormat=snupkg
       - name: Upload Artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: nupkg
           path: ./nupkg/*.*
@@ -49,11 +49,11 @@ jobs:
     name: Publish NuGet package
     steps:
       - name: Download Artifact
-        uses: actions/download-artifact@v1
+        uses: actions/download-artifact@v4
         with:
           name: nupkg
       - name: Setup .NET Core
-        uses: actions/setup-dotnet@v1
+        uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '6.0.x'
           include-prerelease: true
@@ -66,7 +66,7 @@ jobs:
     name: Upload packages to Release
     steps:
       - name: Download Artifact
-        uses: actions/download-artifact@v1
+        uses: actions/download-artifact@v4
         with:
           name: nupkg
       - name: Get Version
