@@ -75,7 +75,7 @@ namespace CacheService.Tests.Integration
         {
             if (JobHostedService is null)
             {
-                throw new ArgumentNullException(nameof(JobHostedService));
+                throw new InvalidOperationException("JobHostedService is not initialized.");
             }
 
             await JobHostedService.StartAsync(CancellationToken);

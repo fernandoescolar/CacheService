@@ -26,7 +26,14 @@ internal class DistributedJob<T> : Job<T>
         }
         catch (Exception ex)
         {
-            _logger.LogWarning("Cannot set to DistributedCache with key: {Key} -> {ex}", Key, ex);
+            _logger.CannotSet(Key, ex.Message);
         }
     }
+}
+
+internal static partial class DistributedJobLoggerExtensions
+{
+    [LoggerMessage(10, LogLevel.Warning, "Cannot set to DistributedCache with key: {Key} -> {ex}")]
+    public static partial void CannotSet(this ILogger<DistributedJob<object>> logger, string key, string ex);
+
 }

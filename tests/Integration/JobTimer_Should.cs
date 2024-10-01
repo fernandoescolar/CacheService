@@ -78,9 +78,7 @@ namespace CacheService.Tests.Integration
             return await Target.GetOrSetAsync(key, options, () => new DummyObject(), CancellationToken);
         }
 
-        private async Task WaitTimerDoHisJob()
-        {
-            await Task.Delay(2500);
-        }
+        private static Task WaitTimerDoHisJob()
+            => Task.Delay(2500);
     }
 }

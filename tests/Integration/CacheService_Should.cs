@@ -72,7 +72,7 @@ namespace CacheService.Tests.Integration
         [Fact]
         public async Task Write_DistributedCache_When_Value_Is_Read_From_ValueGetter()
         {
-            var actual = await Target.GetOrSetAsync(key, () => expected, CancellationToken);
+            await Target.GetOrSetAsync(key, () => expected, CancellationToken);
             var distributedValue = DistributedCache[key];
 
             Assert.Equal(serialized, distributedValue);

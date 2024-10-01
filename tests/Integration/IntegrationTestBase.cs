@@ -7,62 +7,71 @@ using Microsoft.Extensions.Hosting;
 using System;
 using System.Threading;
 
-namespace CacheService.Tests.Integration
+namespace CacheService.Tests.Integration;
+
+public abstract class IntegrationTestBase : IDisposable
 {
-    public abstract class IntegrationTestBase : IDisposable
+    private bool disposed = false;
+
+    protected IntegrationTestBase()
     {
-        private bool disposed = false;
+        MemoryCache = new DummyMemoryCache();
+        DistributedCache = new DummyDistributedCache();
 
-        protected IntegrationTestBase()
+        var services = new ServiceCollection();
+        services.AddLogging();
+        services.AddSingleton<IMemoryCache>(MemoryCache);
+        services.AddSingleton<IDistributedCache>(DistributedCache);
+        services.AddCacheService(OnConfigure);
+
+        ServiceProvider = services.BuildServiceProvider();
+        Target = ServiceProvider.GetRequiredService<ICacheService>();
+        Serializer = ServiceProvider.GetRequiredService<ICacheSerializer>();
+        JobHostedService = ServiceProvider.GetService<IHostedService>();
+        TestScope = new CancellationTokenSource();
+    }
+
+    ~IntegrationTestBase()
+    {
+        Dispose(false);
+    }
+
+    protected ICacheService Target { get; private set; }
+
+    protected ServiceProvider ServiceProvider { get; private set; }
+
+    protected ICacheSerializer Serializer { get; private set; }
+
+    protected IHostedService? JobHostedService { get; private set; }
+
+    protected DummyMemoryCache MemoryCache { get; private set; }
+
+    protected DummyDistributedCache DistributedCache { get; private set; }
+
+    protected CancellationTokenSource TestScope { get; private set; }
+
+    protected CancellationToken CancellationToken => TestScope.Token;
+
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (disposed) return;
+        if (disposing)
         {
-            MemoryCache = new DummyMemoryCache();
-            DistributedCache = new DummyDistributedCache();
-
-            var services = new ServiceCollection();
-            services.AddLogging();
-            services.AddSingleton<IMemoryCache>(MemoryCache);
-            services.AddSingleton<IDistributedCache>(DistributedCache);
-            services.AddCacheService(OnConfigure);
-
-            ServiceProvider = services.BuildServiceProvider();
-            Target = ServiceProvider.GetRequiredService<ICacheService>();
-            Serializer = ServiceProvider.GetRequiredService<ICacheSerializer>();
-            JobHostedService = ServiceProvider.GetService<IHostedService>();
-            TestScope = new CancellationTokenSource();
-        }
-
-        protected ICacheService Target { get; private set; }
-
-        protected ServiceProvider ServiceProvider { get; private set; }
-
-        protected ICacheSerializer Serializer { get; private set; }
-
-        protected IHostedService? JobHostedService { get; private set; }
-
-        protected DummyMemoryCache MemoryCache { get; private set; }
-
-        protected DummyDistributedCache DistributedCache { get; private set; }
-
-        protected CancellationTokenSource TestScope { get; private set; }
-
-        protected CancellationToken CancellationToken => TestScope.Token;
-
-        public void Dispose()
-            => Dispose(true);
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposed) return;
-
             ServiceProvider.Dispose();
             TestScope?.Cancel();
             TestScope?.Dispose();
             disposed = true;
         }
+    }
 
-        protected virtual void OnConfigure(CacheServiceConfiguration configuration)
-        {
-            configuration.BackgroundJobInterval = TimeSpan.FromSeconds(1);
-        }
+    protected virtual void OnConfigure(CacheServiceConfiguration configuration)
+    {
+        configuration.BackgroundJobInterval = TimeSpan.FromSeconds(1);
     }
 }

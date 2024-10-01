@@ -26,11 +26,11 @@ internal class Distributed : ChainLink
         }
         catch(JsonException jex)
         {
-            _logger.LogWarning("Cannot deserialize from json in DistributedCache with key: {Key} -> {jex}", context.Key, jex);
+            _logger.CannotDeserializeJson(context.Key, jex.Message);
         }
         catch (Exception ex)
         {
-            _logger.LogWarning("Cannot get from DistributedCache with key: {Key} -> {ex}", context.Key, ex);
+            _logger.CannotSet(context.Key, ex.Message);
         }
 
         return default;
@@ -51,11 +51,11 @@ internal class Distributed : ChainLink
         }
         catch(JsonException jex)
         {
-            _logger.LogWarning("Cannot serialize to json in DistributedCache with key: {Key} -> {jex}", context.Key, jex);
+            _logger.CannotDeserializeJson(context.Key, jex.Message);
         }
         catch (Exception ex)
         {
-            _logger.LogWarning("Cannot set to DistributedCache with key: {Key} -> {ex}", context.Key, ex);
+            _logger.CannotSet(context.Key, ex.Message);
         }
     }
 
@@ -63,4 +63,13 @@ internal class Distributed : ChainLink
         => context.Options.ForceRefresh
         && context.Options.Distributed.AbsoluteExpiration <= DateTimeOffset.UtcNow
         && context.Value is null;
+}
+
+internal static partial class DistributedLoggerExtensions
+{
+    [LoggerMessage(0, LogLevel.Warning, "Cannot deserialize from json in DistributedCache with key: {Key} -> {jex}")]
+    public static partial void CannotDeserializeJson(this ILogger logger, string key, string jex);
+
+    [LoggerMessage(1, LogLevel.Warning, "Cannot set to DistributedCache with key: {Key} -> {ex}")]
+    public static partial void CannotSet(this ILogger logger, string key, string ex);
 }

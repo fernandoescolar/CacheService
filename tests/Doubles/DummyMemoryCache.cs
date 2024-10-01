@@ -1,48 +1,45 @@
 ﻿using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Primitives;
-using System;
 using System.Collections.Generic;
 
-namespace CacheService.Tests.Doubles
+namespace CacheService.Tests.Doubles;
+
+public sealed class DummyMemoryCache : Dictionary<string, DummyCacheEntry>, IMemoryCache
 {
-    public class DummyMemoryCache : Dictionary<string, DummyCacheEntry>, IMemoryCache
+    public ICacheEntry CreateEntry(object key)
     {
-        public ICacheEntry CreateEntry(object key)
+        var skey = key?.ToString() ?? string.Empty;
+        var entry = new DummyCacheEntry(skey);
+        if (!ContainsKey(skey))
         {
-            var skey = key?.ToString() ?? string.Empty;
-            var entry = new DummyCacheEntry(skey);
-            if (!ContainsKey(skey))
-            {
-                Add(entry.KeyString, entry);
-            }
-            else
-            {
-                this[skey] = entry;
-            }
-
-            return entry;
+            Add(entry.KeyString, entry);
+        }
+        else
+        {
+            this[skey] = entry;
         }
 
-        public void Dispose()
+        return entry;
+    }
+
+    public void Dispose()
+    {
+    }
+
+    void IMemoryCache.Remove(object key)
+    {
+        base.Remove(key?.ToString() ?? string.Empty);
+    }
+
+    bool IMemoryCache.TryGetValue(object key, out object? value)
+    {
+        var k = key?.ToString() ?? string.Empty;
+        if (base.ContainsKey(k))
         {
+            value = base[k].Value;
+            return true;
         }
 
-        public void Remove(object key)
-        {
-            base.Remove(key?.ToString() ?? string.Empty);
-        }
-
-        public bool TryGetValue(object key, out object? value)
-        {
-            var k = key?.ToString() ?? string.Empty;
-            if (base.ContainsKey(k))
-            {
-                value = base[k].Value;
-                return true;
-            }
-
-            value = default;
-            return false;
-        }
+        value = default;
+        return false;
     }
 }

@@ -1,4 +1,5 @@
-﻿using CacheService;
+﻿using ConsoleApp;
+using CacheService;
 using CacheService.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -30,5 +31,3 @@ await Task.Delay(10_000);
 
 value = await cache.GetOrSetAsync("value", _ => ValueTask.FromResult<Number?>(new Number(random.Next(0, 1000))));
 Console.WriteLine($"Value is: {value}");
-
-record Number(int Value);

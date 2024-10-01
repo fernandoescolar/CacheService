@@ -10,7 +10,7 @@ internal abstract class Job<T> : IJob
 
     public Func<CancellationToken, ValueTask<T?>> ValueGetter { get; protected set; }
 
-    public Job(JobParameters<T> parameters)
+    protected Job(JobParameters<T> parameters)
     {
         Key = parameters.Key;
         Options = parameters.Options;
@@ -29,8 +29,7 @@ internal abstract class Job<T> : IJob
 
     public IJob UpdateJob(IJob otherJob)
     {
-        var j = otherJob as Job<T>;
-        if (j is null)
+        if (otherJob is not Job<T> j)
         {
             throw new InvalidOperationException($"otherJob doesn't is a JobDetails<{typeof(T).Name}>");
         }

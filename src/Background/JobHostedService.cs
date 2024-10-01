@@ -2,7 +2,7 @@
 
 using Microsoft.Extensions.Hosting;
 
-internal class JobHostedService : BackgroundService, IDisposable
+internal sealed class JobHostedService : BackgroundService, IDisposable
 {
     private readonly IJobManager _bgManager;
     private readonly int _intervalInMs;
