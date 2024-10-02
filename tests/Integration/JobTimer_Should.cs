@@ -42,6 +42,22 @@ namespace CacheService.Tests.Integration
         }
 
         [Fact]
+        public async Task Update_InvalidatedValue()
+        {
+            options.Distributed.RefreshInterval = TimeSpan.FromSeconds(1);
+            var expected = new DummyObject();
+            var actual = await Target.GetOrSetAsync(key, options, () => expected, CancellationToken);
+
+            Assert.Equal(expected, actual);
+
+            await Target.InvalidateAsync(key, CancellationToken);
+
+            actual = await TestActAsync();
+            Assert.Equal(expected, actual);
+        }
+
+
+        [Fact]
         public async Task Not_Update_MemoryCache()
         {
             options.Memory.RefreshInterval = default;

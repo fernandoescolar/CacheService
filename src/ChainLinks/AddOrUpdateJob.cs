@@ -15,7 +15,8 @@ internal class AddOrUpdateJob : IChainLink
 
     public ValueTask<T?> HandleAsync<T>(ChainContext<T> context) where T : class
     {
-        _bgManager.AddOrUpdateJob(context.Key, context.ValueGetter, context.Options);
+        if (context is not InvalidateChainContext) // do not update or add job if it is an invalidation request
+            _bgManager.AddOrUpdateJob(context.Key, context.ValueGetter, context.Options);
 
         if (Next is not null)
             return Next.HandleAsync(context);
