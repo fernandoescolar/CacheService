@@ -47,11 +47,12 @@ jobs:
         with:
           name: nupkg
           path: ./nupkg
-      - name: Setup .NET Core
+      - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '6.0.x'
-          include-prerelease: true
+          dotnet-version: |
+            8.0.x
+            9.0.x
       - name: Publish NuGet packages
         run: |
           dotnet nuget push ./nupkg/*.nupkg -k ${{ secrets.NUGET_KEY }} -s https://api.nuget.org/v3/index.json
@@ -83,7 +84,7 @@ jobs:
     needs: [ nugets, release ]
     runs-on: ubuntu-latest
     steps:
-      - uses: geekyeggo/delete-artifact@v1
+      - uses: geekyeggo/delete-artifact@v5
         with:
           name: |
             nupkg
