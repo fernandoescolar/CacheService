@@ -1,8 +1,7 @@
 [![license](https://img.shields.io/badge/License-MIT-purple.svg)](../../LICENSE)
 [![version](https://img.shields.io/nuget/vpre/CacheService)](https://www.nuget.org/packages/CacheService)
-![This package is compatible with this framework or higher](https://img.shields.io/badge/.Net-6.0-blue)
-![This package is compatible with this framework or higher](https://img.shields.io/badge/.Net-7.0-blue)
 ![This package is compatible with this framework or higher](https://img.shields.io/badge/.Net-8.0-blue)
+![This package is compatible with this framework or higher](https://img.shields.io/badge/.Net-9.0-blue)
 ![release action](https://github.com/fernandoescolar/CacheService/actions/workflows/publish.yaml/badge.svg)
 ![ci action](https://github.com/fernandoescolar/CacheService/actions/workflows/integration.yaml/badge.svg)
 

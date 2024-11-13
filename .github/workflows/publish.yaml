@@ -11,19 +11,13 @@ jobs:
     name: Build CacheService
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
-      - name: Setup .NET 6
-        uses: actions/setup-dotnet@v1
+        uses: actions/checkout@v4
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '6.0.x'
-      - name: Setup .NET 7
-        uses: actions/setup-dotnet@v1
-        with:
-          dotnet-version: '7.0.x'
-      - name: Setup .NET 8
-        uses: actions/setup-dotnet@v1
-        with:
-          dotnet-version: '8.0.x'
+          dotnet-version: |
+            8.0.x
+            9.0.x
       - name: Build
         run: dotnet build src/CacheService.csproj
       - name: Test
@@ -73,21 +67,18 @@ jobs:
           path: ./nupkg
       - name: Get Version
         id: vars
-        run: echo ::set-output name=tag::${GITHUB_REF#refs/*/}
+        run: echo "tag=${GITHUB_REF#refs/*/}" >> $GITHUB_OUTPUT
       - name: Create Release
-        uses: actions/create-release@v1
+        uses: softprops/action-gh-release@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
+          name: Release ${{ steps.vars.outputs.tag }}
           tag_name: ${{ steps.vars.outputs.tag }}
-          release_name: Release ${{ steps.vars.outputs.tag }}
           draft: false
           prerelease: false
-      - uses: AButler/upload-release-assets@v2.0
-        with:
-          files: 'nupkg/*.*'
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          release-tag: ${{ steps.vars.outputs.tag }}
+          files: |
+            nupkg/*.nupkg
   cleanup:
     needs: [ nugets, release ]
     runs-on: ubuntu-latest
