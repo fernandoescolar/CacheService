@@ -1,6 +1,6 @@
 namespace CacheService.ChainLinks;
 
-internal class Source : ChainLink
+internal sealed class Source : ChainLink
 {
     public Source() : base(30)
     {

@@ -1,16 +1,14 @@
-﻿using CacheService.Configuration;
-using CacheService.Tests.Doubles;
-using Microsoft.Extensions.Caching.Distributed;
-using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using System;
-using System.Threading;
+﻿
 
 namespace CacheService.Tests.Integration;
 
 public abstract class IntegrationTestBase : IDisposable
 {
+    private readonly ServiceProvider _sp;
+    private readonly IServiceScope _scope;
+
+    private readonly Lazy<ICacheService> _target;
+    private readonly Lazy<IHostedService?> _jobHostedService;
     private bool disposed = false;
 
     protected IntegrationTestBase()
@@ -24,10 +22,11 @@ public abstract class IntegrationTestBase : IDisposable
         services.AddSingleton<IDistributedCache>(DistributedCache);
         services.AddCacheService(OnConfigure);
 
-        ServiceProvider = services.BuildServiceProvider();
-        Target = ServiceProvider.GetRequiredService<ICacheService>();
-        Serializer = ServiceProvider.GetRequiredService<ICacheSerializer>();
-        JobHostedService = ServiceProvider.GetService<IHostedService>();
+        _sp = services.BuildServiceProvider();
+        _scope = _sp.CreateScope();
+
+        _target = new Lazy<ICacheService>(() => _sp.GetRequiredService<ICacheService>());
+        _jobHostedService = new Lazy<IHostedService?>(() => _sp.GetService<IHostedService>());
         TestScope = new CancellationTokenSource();
     }
 
@@ -36,13 +35,11 @@ public abstract class IntegrationTestBase : IDisposable
         Dispose(false);
     }
 
-    protected ICacheService Target { get; private set; }
+    protected ICacheService Target => _target.Value;
 
-    protected ServiceProvider ServiceProvider { get; private set; }
+    protected IServiceProvider ServiceProvider => _sp;
 
-    protected ICacheSerializer Serializer { get; private set; }
-
-    protected IHostedService? JobHostedService { get; private set; }
+    protected IHostedService? JobHostedService => _jobHostedService.Value;
 
     protected DummyMemoryCache MemoryCache { get; private set; }
 
@@ -63,9 +60,10 @@ public abstract class IntegrationTestBase : IDisposable
         if (disposed) return;
         if (disposing)
         {
-            ServiceProvider.Dispose();
             TestScope?.Cancel();
             TestScope?.Dispose();
+            _scope.Dispose();
+            _sp.Dispose();
             disposed = true;
         }
     }

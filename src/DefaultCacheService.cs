@@ -4,9 +4,9 @@ internal sealed class DefaultCacheService : ChainOfResponsibility, ICacheService
 {
     private readonly CacheServiceConfiguration _configuration;
 
-    public DefaultCacheService(CacheServiceConfiguration configuration, IEnumerable<IChainLink> chainLinks)
+    public DefaultCacheService(IOptions<CacheServiceConfiguration> configuration, IEnumerable<IChainLink> chainLinks)
     {
-        _configuration = configuration;
+        _configuration = configuration.Value;
 
         chainLinks = chainLinks ?? throw new ArgumentNullException(nameof(chainLinks));
 

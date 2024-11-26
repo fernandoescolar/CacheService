@@ -1,24 +1,19 @@
-﻿using System;
-using System.Text.Json;
-using System.Text.Json.Serialization;
+﻿namespace CacheService.Tests.Doubles;
 
-namespace CacheService.Tests.Doubles
+public class ErrorInSerializeConverter : JsonConverter<ErrorInSerialize>
 {
-    public class ErrorInSerializeConverter : JsonConverter<ErrorInSerialize>
+    public override bool CanConvert(Type typeToConvert)
     {
-        public override bool CanConvert(Type typeToConvert)
-        {
-            throw new NotImplementedException();
-        }
+        throw new NotImplementedException();
+    }
 
-        public override ErrorInSerialize? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-        {
-            throw new NotImplementedException();
-        }
+    public override ErrorInSerialize? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    {
+        throw new NotImplementedException();
+    }
 
-        public override void Write(Utf8JsonWriter writer, ErrorInSerialize value, JsonSerializerOptions options)
-        {
-            throw new NotImplementedException();
-        }
+    public override void Write(Utf8JsonWriter writer, ErrorInSerialize value, JsonSerializerOptions options)
+    {
+        throw new NotImplementedException();
     }
 }

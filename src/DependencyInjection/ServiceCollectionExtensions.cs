@@ -1,6 +1,5 @@
-﻿namespace Microsoft.Extensions.DependencyInjection;
-
-using Microsoft.Extensions.DependencyInjection.Extensions;
+﻿
+namespace Microsoft.Extensions.DependencyInjection;
 
 public static class ServiceCollectionExtensions
 {
@@ -12,62 +11,86 @@ public static class ServiceCollectionExtensions
     /// <returns>The current <see cref="IServiceCollection" /></returns>
     public static IServiceCollection AddCacheService(this IServiceCollection services, Action<CacheServiceConfiguration>? configure = null)
     {
-        var configuration = new CacheServiceConfiguration();
-        configure?.Invoke(configuration);
-
-        services.AddSingleton(configuration);
-        services.TryAddSingleton<ICacheSerializer, DefaultCacheSerializer>();
-        services.TryAddTransient<ICacheService, DefaultCacheService>();
-        services.AddTransient<IChainLink, Source>();
-
-        if (configuration.UseMemoryCache)
-        {
-            services.AddTransient<IChainLink, Memory>();
-        }
-
-        if (configuration.UseDistributedCache)
-        {
-            services.AddTransient<IChainLink, Distributed>();
-        }
-
-        if (configuration.BackgroundJobMode != BackgroundJobMode.None)
-        {
-            services.AddBackgroundJobDependencies();
-        }
-
-        if (configuration.BackgroundJobMode == BackgroundJobMode.HostedService)
-        {
-            services.AddBackgroundJobHostedService();
-        }
-
-        if (configuration.BackgroundJobMode == BackgroundJobMode.Timer)
-        {
-            services.AddBackgroundJobTimer();
-        }
+        services.AddCoreDependencies(configure);
+        services.AddBackgroundDependencies();
 
         return services;
     }
 
-    private static IServiceCollection AddBackgroundJobDependencies(this IServiceCollection services)
+    private static IServiceCollection AddCoreDependencies(this IServiceCollection services, Action<CacheServiceConfiguration>? configure = null)
     {
-        services.AddTransient<IChainLink, AddOrUpdateJob>();
+        services.Configure<CacheServiceConfiguration>(options => configure?.Invoke(options));
+        services.AddSingleton<Source>();
+        services.AddSingleton<Memory>();
+        services.AddSingleton<Distributed>();
+        services.TryAddSingleton<ICacheSerializer, EmptyCacheSerializer>();
+        services.TryAddSingleton<ICacheService>(sp =>
+        {
+            var configuration = sp.GetRequiredService<IOptions<CacheServiceConfiguration>>();
+            var chainLinks = new List<IChainLink>
+            {
+                sp.GetRequiredService<Source>()
+            };
+
+            if (configuration.Value.UseMemoryCache)
+            {
+                chainLinks.Add(sp.GetRequiredService<Memory>());
+            }
+
+            if (configuration.Value.UseDistributedCache)
+            {
+                chainLinks.Add(sp.GetRequiredService<Distributed>());
+            }
+
+            if (configuration.Value.BackgroundJobMode != BackgroundJobMode.None)
+            {
+                chainLinks.Add(sp.GetRequiredService<AddOrUpdateJob>());
+            }
+
+            if (configuration.Value.BackgroundJobMode == BackgroundJobMode.Timer)
+            {
+                chainLinks.Add(sp.GetRequiredService<StartJobTimer>());
+            }
+
+            return ActivatorUtilities.CreateInstance<DefaultCacheService>(sp, configuration, chainLinks);
+        });
+
+        return services;
+    }
+
+    private static IServiceCollection AddBackgroundDependencies(this IServiceCollection services)
+    {
+        services.AddSingleton<StartJobTimer>();
+        services.AddSingleton<AddOrUpdateJob>();
 
         services.TryAddSingleton<IJobManager, DefaultJobManager>();
 
         services.AddSingleton<MemoryCacheFactory>(s => () => s.GetRequiredService<IMemoryCache>());
         services.AddSingleton<DistributedCacheFactory>(s => () => s.GetRequiredService<IDistributedCache>());
         services.AddSingleton<CacheSerializerFactory>(s => () => s.GetRequiredService<ICacheSerializer>());
-
+        services.AddSingleton<JobTimer>();
+        services.AddSingleton<JobHostedService>();
+        services.AddBackgroundJobHostedService();
         return services;
     }
 
     private static IServiceCollection AddBackgroundJobHostedService(this IServiceCollection services)
-        => services.AddHostedService<JobHostedService>();
+        => services.AddSingleton<IHostedService>(sp =>
+        {
+            var configuration = sp.GetRequiredService<IOptions<CacheServiceConfiguration>>().Value;
+            return configuration.BackgroundJobMode switch
+            {
+                BackgroundJobMode.HostedService => sp.GetRequiredService<JobHostedService>(),
+                _ => new EmptyHostedService()
+            };
+        });
 
-    private static IServiceCollection AddBackgroundJobTimer(this IServiceCollection services)
+    private sealed class EmptyHostedService : IHostedService
     {
-        services.AddSingleton<IChainLink, StartJobTimer>();
-        services.AddSingleton<JobTimer>();
-        return services;
+        public Task StartAsync(CancellationToken cancellationToken)
+            => Task.CompletedTask;
+
+        public Task StopAsync(CancellationToken cancellationToken)
+            => Task.CompletedTask;
     }
 }

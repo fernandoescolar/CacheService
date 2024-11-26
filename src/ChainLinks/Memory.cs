@@ -1,6 +1,6 @@
 namespace CacheService.ChainLinks;
 
-internal class Memory : ChainLink
+internal sealed class Memory : ChainLink
 {
     private readonly IMemoryCache _memoryCache;
 

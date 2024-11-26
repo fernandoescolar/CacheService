@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-
-namespace CacheService.Tests.Doubles;
+﻿namespace CacheService.Tests.Doubles;
 
 public sealed class DummyObject : IEquatable<DummyObject>, IEqualityComparer<DummyObject>
 {

@@ -1,8 +1,3 @@
-using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Primitives;
-using System;
-using System.Collections.Generic;
-
 namespace CacheService.Tests.Doubles;
 
 public sealed class DummyCacheEntry : ICacheEntry

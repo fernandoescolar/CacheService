@@ -1,7 +1,3 @@
-using System;
-using System.Threading.Tasks;
-using CacheService.Tests.Doubles;
-
 namespace CacheService.Tests.Integration.Configuration;
 
 public abstract class ConfigurationIntegrationTestBase : IntegrationTestBase

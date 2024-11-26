@@ -1,101 +1,99 @@
-﻿using CacheService.Tests.Doubles;
-using System;
-using System.Threading.Tasks;
-using Xunit;
+﻿namespace CacheService.Tests.Integration;
 
-namespace CacheService.Tests.Integration
+public class CacheService_Should : IntegrationTestBase
 {
-    public class CacheService_Should : IntegrationTestBase
+    private readonly string key;
+    private readonly DummyObject expected;
+    private readonly byte[] serialized;
+
+    public CacheService_Should()
+        : base()
     {
-        private readonly string key;
-        private readonly DummyObject expected;
-        private readonly byte[] serialized;
+        key = Guid.NewGuid().ToString();
+        expected = new();
+        serialized = System.Text.Encoding.UTF8.GetBytes($@"{{""Id"":""{expected.Id}""}}");
+    }
 
-        public CacheService_Should()
-            : base()
-        {
-            key = Guid.NewGuid().ToString();
-            expected = new();
-            serialized = System.Text.Encoding.UTF8.GetBytes($@"{{""Id"":""{expected.Id}""}}");
-        }
+    [Fact]
+    public async Task Read_From_MemoryCache()
+    {
+        MemoryCache.Add(key, new DummyCacheEntry(key) { Value = expected });
 
-        [Fact]
-        public async Task Read_From_MemoryCache()
-        {
-            MemoryCache.Add(key, new DummyCacheEntry(key) { Value = expected });
+        var actual = await Target.GetOrSetAsync(key, () => new DummyObject(), CancellationToken);
 
-            var actual = await Target.GetOrSetAsync(key, () => new DummyObject(), CancellationToken);
+        Assert.Equal(expected, actual);
+    }
 
-            Assert.Equal(expected, actual);
-        }
+    [Fact]
+    public async Task Read_From_DistributedCache()
+    {
+        DistributedCache.Add(key, serialized);
 
-        [Fact]
-        public async Task Read_From_DistributedCache()
-        {
-            DistributedCache.Add(key, serialized);
+        var actual = await Target.GetOrSetAsync(key, () => new DummyObject(), CancellationToken);
 
-            var actual = await Target.GetOrSetAsync(key, () => new DummyObject(), CancellationToken);
+        Assert.Equal(expected, actual);
+    }
 
-            Assert.Equal(expected, actual);
-        }
+    [Fact]
+    public async Task Read_From_ValueGetter()
+    {
+        var actual = await Target.GetOrSetAsync(key, () => expected, CancellationToken);
 
-        [Fact]
-        public async Task Read_From_ValueGetter()
-        {
-            var actual = await Target.GetOrSetAsync(key, () => expected, CancellationToken);
+        Assert.Equal(expected, actual);
+    }
 
-            Assert.Equal(expected, actual);
-        }
+    [Fact]
+    public async Task Write_MemoryCache_When_Value_Is_Read_From_DistributedCache()
+    {
+        DistributedCache.Add(key, serialized);
 
-        [Fact]
-        public async Task Write_MemoryCache_When_Value_Is_Read_From_DistributedCache()
-        {
-            DistributedCache.Add(key, serialized);
+        var actual = await Target.GetOrSetAsync(key, () => new DummyObject(), CancellationToken);
+        var memoryValue = MemoryCache[key].Value;
 
-            var actual = await Target.GetOrSetAsync(key, () => new DummyObject(), CancellationToken);
-            var memoryValue = MemoryCache[key].Value;
+        Assert.Equal(expected, actual);
+        Assert.Equal(expected, memoryValue);
+    }
 
-            Assert.Equal(expected, actual);
-            Assert.Equal(expected, memoryValue);
-        }
+    [Fact]
+    public async Task Write_MemoryCache_When_Value_Is_Read_From_ValueGetter()
+    {
+        var actual = await Target.GetOrSetAsync(key, () => expected, CancellationToken);
+        var memoryValue = MemoryCache[key].Value;
 
-        [Fact]
-        public async Task Write_MemoryCache_When_Value_Is_Read_From_ValueGetter()
-        {
-            var actual = await Target.GetOrSetAsync(key, () => expected, CancellationToken);
-            var memoryValue = MemoryCache[key].Value;
+        Assert.Equal(expected, actual);
+        Assert.Equal(expected, memoryValue);
+    }
 
-            Assert.Equal(expected, actual);
-            Assert.Equal(expected, memoryValue);
-        }
+    [Fact]
+    public async Task Write_DistributedCache_When_Value_Is_Read_From_ValueGetter()
+    {
+        await Target.GetOrSetAsync(key, () => expected, CancellationToken);
 
-        [Fact]
-        public async Task Write_DistributedCache_When_Value_Is_Read_From_ValueGetter()
-        {
-            await Target.GetOrSetAsync(key, () => expected, CancellationToken);
-            var distributedValue = DistributedCache[key];
+        // Set operation is async, so we need to wait a bit
+        await Task.Delay(100);
 
-            Assert.Equal(serialized, distributedValue);
-        }
+        var distributedValue = DistributedCache[key];
 
-        [Fact]
-        public async Task Delete_MemoryCache_Value_When_It_Is_Invalidated()
-        {
-            MemoryCache.Add(key, new DummyCacheEntry(key) { Value = expected });
+        Assert.Equal(serialized, distributedValue);
+    }
 
-            await Target.InvalidateAsync(key, CancellationToken);
+    [Fact]
+    public async Task Delete_MemoryCache_Value_When_It_Is_Invalidated()
+    {
+        MemoryCache.Add(key, new DummyCacheEntry(key) { Value = expected });
 
-            Assert.False(MemoryCache.ContainsKey(key));
-        }
+        await Target.InvalidateAsync(key, CancellationToken);
 
-        [Fact]
-        public async Task Delete_DistributedCache_Value_When_It_Is_Invalidated()
-        {
-            DistributedCache.Add(key, serialized);
+        Assert.False(MemoryCache.ContainsKey(key));
+    }
 
-            await Target.InvalidateAsync(key, CancellationToken);
+    [Fact]
+    public async Task Delete_DistributedCache_Value_When_It_Is_Invalidated()
+    {
+        DistributedCache.Add(key, serialized);
 
-            Assert.False(DistributedCache.ContainsKey(key));
-        }
+        await Target.InvalidateAsync(key, CancellationToken);
+
+        Assert.False(DistributedCache.ContainsKey(key));
     }
 }

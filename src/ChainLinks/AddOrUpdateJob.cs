@@ -1,6 +1,6 @@
 ﻿namespace CacheService.ChainLinks;
 
-internal class AddOrUpdateJob : IChainLink
+internal sealed class AddOrUpdateJob : IChainLink
 {
     private readonly IJobManager _bgManager;
 

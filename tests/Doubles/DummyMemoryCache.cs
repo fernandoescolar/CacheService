@@ -1,7 +1,4 @@
-﻿using Microsoft.Extensions.Caching.Memory;
-using System.Collections.Generic;
-
-namespace CacheService.Tests.Doubles;
+﻿namespace CacheService.Tests.Doubles;
 
 public sealed class DummyMemoryCache : Dictionary<string, DummyCacheEntry>, IMemoryCache
 {

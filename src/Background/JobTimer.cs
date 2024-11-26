@@ -6,11 +6,11 @@ internal sealed class JobTimer : IDisposable
     private readonly IJobManager _bgManager;
     private readonly Timer _timer;
 
-    public JobTimer(IJobManager bgManager, CacheServiceConfiguration configuration)
+    public JobTimer(IJobManager bgManager, IOptions<CacheServiceConfiguration> configuration)
     {
         _cancellationTokenSource = new CancellationTokenSource();
         _bgManager = bgManager;
-        _timer = new Timer(OnTimerCallback, default, 0, (int)configuration.BackgroundJobInterval.TotalMilliseconds);
+        _timer = new Timer(OnTimerCallback, default, 0, (int)configuration.Value.BackgroundJobInterval.TotalMilliseconds);
     }
 
     private void OnTimerCallback(object? state)

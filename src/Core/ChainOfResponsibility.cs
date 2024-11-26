@@ -2,7 +2,7 @@ namespace CacheService.Core;
 
 internal abstract class ChainOfResponsibility
 {
-    private readonly List<IChainLink> _links = new();
+    private IChainLink[] _links = [];
 
     public ValueTask<T?> HandleAsync<T>(ChainContext<T> context) where T : class
     {
@@ -23,6 +23,6 @@ internal abstract class ChainOfResponsibility
             last.Next = link;
         }
 
-        _links.Add(link);
+        _links = [.. _links, link];
     }
 }

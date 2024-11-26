@@ -1,6 +1,6 @@
 namespace CacheService.ChainLinks;
 
-internal class StartJobTimer : IChainLink
+internal sealed class StartJobTimer : IChainLink
 {
 
 #pragma warning disable IDE0060 // Remove unused parameter
