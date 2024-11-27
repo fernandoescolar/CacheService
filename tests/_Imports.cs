@@ -1,6 +1,4 @@
-global using CacheService.ChainLinks;
 global using CacheService.Configuration;
-global using CacheService.Core;
 global using CacheService.Tests.Doubles;
 
 global using Microsoft.Extensions.Caching.Distributed;

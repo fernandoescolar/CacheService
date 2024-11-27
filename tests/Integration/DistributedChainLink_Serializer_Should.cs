@@ -1,17 +1,7 @@
-﻿
+﻿namespace CacheService.Tests.Integration;
 
-namespace CacheService.Tests.Integration;
-
-public class DistributedChainLink_CacheSerializer_Should : IntegrationTestBase
+public class DistributedCache_CacheSerializer_Should : IntegrationTestBase
 {
-    private readonly Distributed target;
-
-    public DistributedChainLink_CacheSerializer_Should()
-        : base()
-    {
-        target = ServiceProvider.GetRequiredService<Distributed>();
-    }
-
     [Theory]
 #pragma warning disable xUnit1012 // Null should only be used for nullable parameters
     [InlineData(default(byte[]))]
@@ -21,13 +11,11 @@ public class DistributedChainLink_CacheSerializer_Should : IntegrationTestBase
     public async Task Not_Throw_an_exception_When_distributed_cache_returns_invalid_values(byte[] invalidValue)
     {
         const string someKey = "whatever";
-        var someDummyObjectGetter = (CancellationToken ct) => ValueTask.FromResult(new DummyObject());
 
-
+        MemoryCache.Clear();
         DistributedCache.Add(someKey, invalidValue);
 
-        var context = new ChainContext<DummyObject>(someKey, new CacheServiceOptions(), someDummyObjectGetter, CancellationToken);
-        var actual = await target.HandleAsync(context);
+        var actual = await Target.GetOrSetAsync(someKey, _ => ValueTask.FromResult<DummyObject?>(default), CancellationToken);
 
         Assert.Null(actual);
     }
@@ -37,11 +25,7 @@ public class DistributedChainLink_CacheSerializer_Should : IntegrationTestBase
     {
         const string someKey = "whatever";
         var expected = new ErrorInSerialize();
-        var context = new ChainContext<ErrorInSerialize>(someKey, new CacheServiceOptions(), ct => ValueTask.FromResult<ErrorInSerialize?>(default), CancellationToken);
-        target.Next = new DummyChainLink(expected);
-
-
-        var actual = await target.HandleAsync(context);
+        var actual = await Target.GetOrSetAsync(someKey, _ => ValueTask.FromResult<ErrorInSerialize?>(expected), CancellationToken);
 
         Assert.Empty(DistributedCache);
         Assert.Equal(expected, actual);

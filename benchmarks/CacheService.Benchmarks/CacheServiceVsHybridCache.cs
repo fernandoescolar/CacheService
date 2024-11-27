@@ -1,13 +1,12 @@
-
 namespace CacheService.Benchmarks;
 
+[MemoryDiagnoser]
+[MaxIterationCount(50)]
 public class CacheServiceVsHybridCache
 {
-    private const int ConcurrentCalls = 10;
     private static readonly Random Random = new();
 
     private ICacheService? _cacheService;
-    private UglyCacheService? _ugly;
     private HybridCache? _hybrid;
 
     [GlobalSetup]
@@ -22,15 +21,18 @@ public class CacheServiceVsHybridCache
         });
 
         services.AddCacheService();
-        services.AddUglyCacheService();
         #pragma warning disable EXTEXP0018
         services.AddHybridCache();
 
         var provider = services.BuildServiceProvider();
         _cacheService = provider.GetRequiredService<ICacheService>();
-        _ugly = provider.GetRequiredService<UglyCacheService>();
         _hybrid = provider.GetRequiredService<HybridCache>();
+
+        ConnectionMultiplexer.Connect("localhost:5002,allowAdmin=true").GetServer("localhost:5002").FlushDatabase();
     }
+
+    [Params(1, 10, 100, 200)]
+    public int ConcurrentCalls { get; set; }
 
     [Benchmark(Baseline = true)]
     public void CacheService()
@@ -47,20 +49,6 @@ public class CacheServiceVsHybridCache
     }
 
     [Benchmark()]
-    public void UglyService()
-    {
-        var tasks = new List<Task>();
-        for (var i = 0; i < ConcurrentCalls; i++)
-        {
-            var key = GetRandomString(100);
-            var value = new { property = GetRandomString(2048) };
-            tasks.Add(UglyTask(key, value));
-        }
-
-        Task.WhenAll(tasks).Wait();
-    }
-
-    [Benchmark]
     public void HybridCache()
     {
         var tasks = new List<Task>();
@@ -82,20 +70,6 @@ public class CacheServiceVsHybridCache
         }
 
         var result = await _cacheService.GetOrSetAsync(key, new CacheServiceOptions(), _ => ValueTask.FromResult<T?>(value));
-        if (result is null)
-        {
-            throw new InvalidOperationException("Invalid value");
-        }
-    }
-
-    private async Task UglyTask<T>(string key, T value) where T: class
-    {
-        if (_ugly is null)
-        {
-            throw new InvalidOperationException("Invalid cache");
-        }
-
-        var result = await _ugly.GetOrSetAsync(key, new CacheServiceOptions(), _ => ValueTask.FromResult<T?>(value));
         if (result is null)
         {
             throw new InvalidOperationException("Invalid value");

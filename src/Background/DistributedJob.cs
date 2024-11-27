@@ -16,34 +16,32 @@ internal class DistributedJob<T> : Job<T>
 
     protected override async Task OnExecuteAsync(CancellationToken cancellationToken)
     {
-        var value = await ValueGetter(cancellationToken);
+        var distributedCache = _factory();
+        if (distributedCache is null)
+        {
+            _logger.ExpectedIDistributedCacheButGotNull();
+            return;
+        }
 
+        var value = await ValueGetter(cancellationToken);
         try
         {
-            var distributedCache = _factory();
             var serializer = _serializerFactory();
             byte[] bytes;
-            if (serializer is EmptyCacheSerializer)
+            if (serializer is null)
             {
                 bytes = FastJsonSerializer.Serialize(value);
             }
             else
             {
-                bytes = await _serializerFactory().SerializeAsync(value, cancellationToken)?? [];
+                bytes = await serializer.SerializeAsync(value, cancellationToken)?? [];
             }
 
             await distributedCache.SetAsync(Key, bytes, Options, cancellationToken);
         }
         catch (Exception ex)
         {
-            _logger.CannotSet(Key, ex.Message);
+            _logger.CannotSetDistributedCache(Key, ex.Message);
         }
     }
-}
-
-internal static partial class DistributedJobLoggerExtensions
-{
-    [LoggerMessage(10, LogLevel.Warning, "Cannot set to DistributedCache with key: {Key} -> {ex}")]
-    public static partial void CannotSet(this ILogger<DistributedJob<object>> logger, string key, string ex);
-
 }
