@@ -7,7 +7,22 @@
 
 # CacheService
 
-CacheService is a simple and fast double layer cache service for dotnet core.
+CacheService is a simple and fast double layer cache service for dotnet core. It uses `IMemoryCache` and `IDistributedCache` to store the cache values and has a background process to automatically refresh the cache values at a specified time interval.
+
+## Table of Contents
+
+- [CacheService](#cacheservice)
+  - [Table of Contents](#table-of-contents)
+  - [Features](#features)
+  - [Quick Start](#quick-start)
+  - [Background update](#background-update)
+  - [ICacheService](#icacheservice)
+    - [CacheServiceOptions](#cacheserviceoptions)
+    - [CacheOptions](#cacheoptions)
+  - [Configuration](#configuration)
+  - [Performance vs. HybridCache](#performance-vs-hybridcache)
+    - [Benchmark results](#benchmark-results)
+  - [License](#license)
 
 ## Features
 
@@ -18,9 +33,9 @@ This service have the `GetOrSetAsync()` method and it should:
 2. Read from DistributedCache (if exists return the read value) and then set it in MemoryCache
 3. Read from source (if not exists return `null`) and then set in MemoryCache and DistributedCache.
 
-And all values read from any source or cache should be automatically refreshed in the background at a specified time.
+![Workflow](doc/cacheservice-getorsetasync.png)
 
-![Workflow](doc/workflow.png)
+And all values read from any source or cache should be automatically refreshed in the background at a specified time:
 
 ## Quick Start
 
@@ -72,6 +87,56 @@ public async Task<IActionResult> GetAsync()
     return Ok(model);
 }
 ```
+
+## Background update
+
+The `CacheService` has a background process that automatically refreshes the cache value at a specified time. This feature has some important points:
+
+- When a user configures the `RefreshInterval` in the `CacheOptions` the cache value will be automatically refreshed at the specified time.
+- The `RefreshInterval` can be configured specifically for each request or globally in the `CacheServiceOptions`.
+- To make the background process work, you need to configure the `BackgroundJobMode` in the `CacheServiceOptions`. The options are `None`, `HostedService` or `Timer`.
+
+Example of a global configuration:
+
+```csharp
+services.AddCacheService(op =>
+{
+    op.DefaultOptions = new CacheServiceOptions
+    {
+        Memory = new CacheOptions
+        {
+            RefreshInterval = TimeSpan.FromMinutes(10)
+        },
+        Distributed = new CacheOptions
+        {
+            RefreshInterval = TimeSpan.FromMinutes(10)
+        },
+        BackgroundJobMode = BackgroundJobMode.HostedService,
+        BackgroundJobInterval = TimeSpan.FromMinutes(1)
+    };
+});
+```
+
+Example of a specific configuration:
+
+```csharp
+var cache = serviceProvider.GetRequiredService<ICacheService>();
+var options = new CacheServiceOptions();
+options.Memory.RefreshInterval = TimeSpan.FromMinutes(5);
+options.Distributed.RefreshInterval = TimeSpan.FromMinutes(30);
+
+var myCachedValue = cache.GetOrSetAsync("some-key", options, ct => GetValueFromDatabaseAsync(ct), cancellationToken);
+```
+
+There are two ways to use the background process: `HostedService` and `Timer`.
+
+If you use the `HostedService` mode, the background process will be executed as a hosted service in the application. This way, the cache value will be automatically refreshed at the specified time.
+
+But if your application does not support hosted services, you can use the `Timer` mode. In this mode, the background process will be executed as a timer in the application. The `Timer` is started when the first cache value is set.
+
+
+By default, the `BackgroundJobMode` is set to `HostedService` and the `BackgroundJobInterval` is set to `TimeSpan.FromMinutes(1)`. But there is not a default value for the `RefreshInterval` in the `CacheOptions`, so if you want to use the background process you need to set the `RefreshInterval` in the `CacheOptions`.
+
 
 ## ICacheService
 
@@ -158,7 +223,6 @@ The latest results are:
 | HybridCache  | 200             | 6,590.8 us | 128.88 us | 143.25 us |  1.07 |    0.03 | 726.5625 | 203.1250 | 4895.26 KB |        1.56 |
 
 *Intel Core i7-9750H CPU 2.60GHz, 1 CPU, 12 logical and 6 physical cores*
-
 | Method       | ConcurrentCalls | Mean      | Error     | StdDev    | Ratio | RatioSD | Gen0     | Gen1     | Allocated  | Alloc Ratio |
 |------------- |---------------- |----------:|----------:|----------:|------:|--------:|---------:|---------:|-----------:|------------:|
 | CacheService | 1               |  1.038 ms | 0.0200 ms | 0.0222 ms |  1.00 |    0.03 |   1.9531 |        - |   15.82 KB |        1.00 |
