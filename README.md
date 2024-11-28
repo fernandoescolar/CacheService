@@ -142,24 +142,35 @@ You can see the benchmark project in the `benchmarks/CacheService.Benchmark` fol
 
 The latest results are:
 
-Microsoft.Extensions.Caching.Hybrid v9.0.0-preview.9.24556.5
+**Microsoft.Extensions.Caching.Hybrid v9.0.0-preview.9.24556.5**
+**.NET SDK 9.0.100**
 
-Apple M3 Max, 1 CPU, 14 logical and 14 physical cores
-.NET SDK 9.0.100
-
+*Apple M3 Max, 1 CPU, 14 logical and 14 physical cores*
 | Method       | ConcurrentCalls | Mean       | Error     | StdDev    | Ratio | RatioSD | Gen0     | Gen1     | Allocated  | Alloc Ratio |
 |------------- |---------------- |-----------:|----------:|----------:|------:|--------:|---------:|---------:|-----------:|------------:|
 | CacheService | 1               |   184.0 us |   3.13 us |   2.44 us |  1.00 |    0.02 |   1.9531 |   0.4883 |   15.83 KB |        1.00 |
 | HybridCache  | 1               |   194.5 us |   3.86 us |   5.78 us |  1.06 |    0.03 |   3.9063 |   0.9766 |   24.58 KB |        1.55 |
-|              |                 |            |           |           |       |         |          |          |            |             |
 | CacheService | 10              |   553.0 us |  10.96 us |  17.06 us |  1.00 |    0.04 |  19.5313 |   5.8594 |  156.99 KB |        1.00 |
 | HybridCache  | 10              |   562.0 us |   9.93 us |   9.28 us |  1.02 |    0.04 |  37.1094 |   9.7656 |   245.1 KB |        1.56 |
-|              |                 |            |           |           |       |         |          |          |            |             |
 | CacheService | 100             | 3,361.4 us |  63.93 us |  78.51 us |  1.00 |    0.03 | 199.2188 |  78.1250 | 1567.58 KB |        1.00 |
 | HybridCache  | 100             | 3,531.9 us |  86.35 us | 172.46 us |  1.05 |    0.06 | 359.3750 |  85.9375 | 2448.26 KB |        1.56 |
-|              |                 |            |           |           |       |         |          |          |            |             |
 | CacheService | 200             | 6,168.5 us | 120.16 us | 106.52 us |  1.00 |    0.02 | 390.6250 | 171.8750 | 3134.53 KB |        1.00 |
 | HybridCache  | 200             | 6,590.8 us | 128.88 us | 143.25 us |  1.07 |    0.03 | 726.5625 | 203.1250 | 4895.26 KB |        1.56 |
+
+*Intel Core i7-9750H CPU 2.60GHz, 1 CPU, 12 logical and 6 physical cores*
+
+| Method       | ConcurrentCalls | Mean      | Error     | StdDev    | Ratio | RatioSD | Gen0     | Gen1     | Allocated  | Alloc Ratio |
+|------------- |---------------- |----------:|----------:|----------:|------:|--------:|---------:|---------:|-----------:|------------:|
+| CacheService | 1               |  1.038 ms | 0.0200 ms | 0.0222 ms |  1.00 |    0.03 |   1.9531 |        - |   15.82 KB |        1.00 |
+| HybridCache  | 1               |  1.071 ms | 0.0210 ms | 0.0225 ms |  1.03 |    0.03 |   3.9063 |   1.9531 |   24.57 KB |        1.55 |
+| CacheService | 10              |  1.429 ms | 0.0310 ms | 0.0619 ms |  1.00 |    0.06 |  23.4375 |   7.8125 |  156.56 KB |        1.00 |
+| HybridCache  | 10              |  1.495 ms | 0.0383 ms | 0.0747 ms |  1.05 |    0.07 |  46.8750 |  11.7188 |  244.73 KB |        1.56 |
+| CacheService | 100             |  5.718 ms | 0.1479 ms | 0.2885 ms |  1.00 |    0.07 | 250.0000 |  93.7500 | 1563.96 KB |        1.00 |
+| HybridCache  | 100             |  6.073 ms | 0.1571 ms | 0.3138 ms |  1.06 |    0.08 | 437.5000 | 125.0000 | 2445.72 KB |        1.56 |
+| CacheService | 200             | 10.890 ms | 0.1673 ms | 0.1927 ms |  1.00 |    0.02 | 531.2500 | 171.8750 | 3127.65 KB |        1.00 |
+| HybridCache  | 200             | 12.408 ms | 0.3590 ms | 0.7002 ms |  1.14 |    0.07 | 765.6250 | 437.5000 | 4096.64 KB |        1.31 |
+
+As you can see, the `CacheService` is faster than the `HybridCache` in all scenarios but the difference is not significant. Related to memory usage, the `CacheService` is more efficient than the `HybridCache` because it does not need to use a distributed lock to avoid the stampede effect.
 
 ## License
 

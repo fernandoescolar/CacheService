@@ -1,49 +1,27 @@
 namespace CacheService.Core;
 
-internal static class FastJsonSerializer
+internal sealed class FastJsonSerializer : ICacheSerializer
 {
-    private const int MaxBufferSize = 2147483591;
-    private static ConcurrentStack<ArrayBufferWriter<byte>> _bufferPool = new();
-
-    static FastJsonSerializer()
-    {
-        for (var i = 0; i < 256; i++)
-        {
-            _bufferPool.Push(new ArrayBufferWriter<byte>(MaxBufferSize));
-        }
-    }
-
-    public static T? Deserialize<T>(byte[] bytes)
+    public T? Deserialize<T>(byte[] bytes)
     {
         if (bytes.Length == 0)
         {
             return default;
         }
 
-        return JsonSerializer.Deserialize<T>(bytes);
+        var buffer = new ReadOnlySequence<byte>(bytes, 0, bytes.Length);
+        var reader = new Utf8JsonReader(buffer);
+        return JsonSerializer.Deserialize<T>(ref reader);
     }
 
-    public static byte[] Serialize<T>(T value)
+    public void Serialize<T>(T value, IBufferWriter<byte> target)
     {
         if (value is null)
         {
-            return [];
+            return;
         }
 
-        ArrayBufferWriter<byte> buffer = _bufferPool.TryPop(out var b) ? b : new ArrayBufferWriter<byte>(MaxBufferSize);
-        try
-        {
-            using var writer = new Utf8JsonWriter(buffer);
-            JsonSerializer.Serialize(writer, value);
-            return buffer.WrittenMemory.ToArray();
-        }
-        finally
-        {
-            if (_bufferPool.Count < 256)
-            {
-                buffer.Clear();
-                _bufferPool.Push(buffer);
-            }
-        }
+        using var writer = new Utf8JsonWriter(target);
+        JsonSerializer.Serialize(writer, value);
     }
 }

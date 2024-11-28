@@ -6,13 +6,12 @@ internal sealed partial class UglyCacheService : ICacheService
     private readonly IMemoryCache? _memoryCache;
     private readonly IDistributedCache? _distributedCache;
     private readonly IJobManager? _jobManager;
-    private readonly ICacheSerializer? _serializer;
+    private readonly ICacheSerializer _serializer;
     private readonly ILogger _logger;
 
     private readonly bool _useDistributedCache;
     private readonly bool _useMemoryCache;
     private readonly bool _useJobManager;
-    private readonly bool _useCustomSerializer;
 
     public UglyCacheService(IOptions<CacheServiceConfiguration> configuration, DelegatedFactories factories, ILogger<UglyCacheService> logger)
     {
@@ -26,7 +25,6 @@ internal sealed partial class UglyCacheService : ICacheService
         _useDistributedCache = _distributedCache is not null;
         _useMemoryCache = _memoryCache is not null;
         _useJobManager = _jobManager is not null;
-        _useCustomSerializer = _serializer is not null;
     }
 
     public async ValueTask<T?> GetOrSetAsync<T>(string key, CacheServiceOptions? options, Func<CancellationToken, ValueTask<T?>> getter, CancellationToken cancellationToken = default) where T : class

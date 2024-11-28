@@ -27,17 +27,9 @@ internal class DistributedJob<T> : Job<T>
         try
         {
             var serializer = _serializerFactory();
-            byte[] bytes;
-            if (serializer is null)
-            {
-                bytes = FastJsonSerializer.Serialize(value);
-            }
-            else
-            {
-                bytes = await serializer.SerializeAsync(value, cancellationToken)?? [];
-            }
-
-            await distributedCache.SetAsync(Key, bytes, Options, cancellationToken);
+            using var buffer = new PooledBufferWriter();
+            serializer.Serialize(value, buffer);
+            await distributedCache.SetAsync(Key, buffer.ToArray(), Options, cancellationToken);
         }
         catch (Exception ex)
         {

@@ -14,18 +14,7 @@ sealed partial class UglyCacheService
 
                 if (bytes is not null && bytes.Length > 0)
                 {
-                    T? result;
-                    if (_useCustomSerializer)
-                    {
-                        #nullable disable
-                        result = await _serializer.DeserializeAsync<T>(bytes, cancellationToken) ?? default;
-                        #nullable restore
-                    }
-                    else
-                    {
-                        result = FastJsonSerializer.Deserialize<T>(bytes);
-                    }
-
+                    var result = _serializer.Deserialize<T>(bytes);
                     if (result is not null)
                     {
                         TrySetMemory(key, options, result);
@@ -54,20 +43,10 @@ sealed partial class UglyCacheService
             {
                 try
                 {
-                    byte[] bytes;
-                    if (_useCustomSerializer)
-                    {
-                        #nullable disable
-                        bytes = await _serializer.SerializeAsync(result, default) ?? [];
-                        #nullable restore
-                    }
-                    else
-                    {
-                        bytes = FastJsonSerializer.Serialize(result);
-                    }
-
+                    using var buffer = new PooledBufferWriter();
+                    _serializer.Serialize(result, buffer);
                     #nullable disable
-                    await _distributedCache.SetAsync(key, bytes, ops.Distributed, default);
+                    await _distributedCache.SetAsync(key, buffer.ToArray(), ops.Distributed, default);
                     #nullable restore
                 }
                 catch (JsonException jex)

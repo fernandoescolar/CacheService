@@ -22,6 +22,7 @@ public static class CacheServiceServiceCollectionExtensions
     private static IServiceCollection AddCacheServiceFactory(this IServiceCollection services)
     {
         services.AddSingleton<UglyCacheService>();
+        services.TryAddSingleton<ICacheSerializer, FastJsonSerializer>();
         services.TryAddSingleton<ICacheService>(sp =>
         {
             var configuration = sp.GetRequiredService<IOptions<CacheServiceConfiguration>>();
@@ -54,7 +55,7 @@ public static class CacheServiceServiceCollectionExtensions
              var configuration = sp.GetRequiredService<IOptions<CacheServiceConfiguration>>();
              return configuration.Value.BackgroundJobMode != BackgroundJobMode.None ? sp.GetRequiredService<IJobManager>() : default;
         });
-        services.AddSingleton<CacheSerializerFactory>(sp => () => sp.GetService<ICacheSerializer>());
+        services.AddSingleton<CacheSerializerFactory>(sp => () => sp.GetRequiredService<ICacheSerializer>());
         services.AddSingleton<DelegatedFactories>();
 
         return services;
