@@ -1,6 +1,5 @@
 ﻿global using CacheService;
 global using CacheService.Background;
-global using CacheService.ChainLinks;
 global using CacheService.Configuration;
 global using CacheService.Core;
 global using CacheService.Extensions;

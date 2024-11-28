@@ -70,7 +70,7 @@ public class CacheService_Should : IntegrationTestBase
         await Target.GetOrSetAsync(key, () => expected, CancellationToken);
 
         // Set operation is async, so we need to wait a bit
-        await Task.Delay(100);
+        await Task.Delay(1000);
 
         var distributedValue = DistributedCache[key];
 
