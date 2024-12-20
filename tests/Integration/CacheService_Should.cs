@@ -78,6 +78,26 @@ public class CacheService_Should : IntegrationTestBase
     }
 
     [Fact]
+    public async Task Write_DistributedCache_When_Value_Is_Too_Big()
+    {
+        var value = new Dictionary<string, TestData>();
+        for (var i = 0; i < 1_000; i++)
+        {
+            var id = i.ToString();
+            value[id] = new(id, Guid.NewGuid().ToString(), Guid.NewGuid().ToString());
+        }
+
+        await Target.GetOrSetAsync(key, () => value, CancellationToken);
+
+        // Set operation is async, so we need to wait a bit
+        await Task.Delay(1_000);
+
+        var distributedValue = DistributedCache[key];
+
+        Assert.NotNull(distributedValue);
+    }    
+
+    [Fact]
     public async Task Delete_MemoryCache_Value_When_It_Is_Invalidated()
     {
         MemoryCache.Add(key, new DummyCacheEntry(key) { Value = expected });
@@ -96,4 +116,6 @@ public class CacheService_Should : IntegrationTestBase
 
         Assert.False(DistributedCache.ContainsKey(key));
     }
+
+    private sealed record TestData(string Id, string Field1, string Field2);
 }
