@@ -70,7 +70,7 @@ internal sealed class PooledBufferWriter : IBufferWriter<byte>, IDisposable
         var newSize = _buffer.Length == 0 ? 1 : _buffer.Length * 2;
         if (sizeHint > 0)
         {
-            newSize = Math.Max(newSize, sizeHint);
+            newSize = Math.Max(newSize, sizeHint + _position);
         }
 
         var newBuffer = ArrayPool<byte>.Shared.Rent(newSize);
