@@ -26,12 +26,12 @@ CacheService is a simple and fast double layer cache service for dotnet core. It
 
 ## Features
 
-The main idea is to have an in memory cache and a distributed cache, both managed by a single service: `ICacheService`.
+The main idea is to have an in-memory cache and a distributed cache, both managed by a single service: `ICacheService`.
 
 This service have the `GetOrSetAsync()` method and it should:
-1. Read from MemoryCache (if exists return the read value)
-2. Read from DistributedCache (if exists return the read value) and then set it in MemoryCache
-3. Read from source (if not exists return `null`) and then set in MemoryCache and DistributedCache.
+1. Read from MemoryCache (if it exists return the read value)
+2. Read from DistributedCache (if it exists return the read value) and then set it in MemoryCache
+3. Read from source (if it doesn't exist return `null`) and then set in MemoryCache and DistributedCache.
 
 ![Workflow](doc/cacheservice-getorsetasync.png)
 
@@ -45,7 +45,7 @@ Before using this library, you need to install the NuGet package:
 dotnet add package CacheService
 ```
 
-CacheService has some dependencies should be already registered in your application: `ILoggerFactory`, `IMemoryCache` and `IDistributed`. As an example:
+CacheService has some dependencies that should be already registered in your application: `ILoggerFactory`, `IMemoryCache` and `IDistributed`. As an example:
 
 ```csharp
 using Microsoft.Extensions.Logging;
@@ -238,4 +238,4 @@ As you can see, the `CacheService` is faster than the `HybridCache` in all scena
 
 ## License
 
-The source code we develop at CacheService is default being licensed as MIT. You can read more about [here](LICENSE).
+The source code we develop at CacheService is by default being licensed as MIT. You can read more about [here](LICENSE).
