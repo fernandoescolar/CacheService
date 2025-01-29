@@ -34,15 +34,19 @@ internal sealed partial class UglyCacheService : ICacheService
 
         var result = default(T);
         AddOrUpdateJob(key, ops, getter);
-        if (TryGetFromMemory(key, ref result))
-        {
-            return result;
-        }
 
-        result = await TryGetFromDistributedAsync<T>(key, ops, cancellationToken);
-        if (result is not null)
+        if (!(options?.ForceRefresh ?? false))
         {
-            return result;
+            if (TryGetFromMemory(key, ref result))
+            {
+                return result;
+            }
+
+            result = await TryGetFromDistributedAsync<T>(key, ops, cancellationToken);
+            if (result is not null)
+            {
+                return result;
+            }
         }
 
         return await TryGetFromSourceAsync<T>(key, getter, ops, cancellationToken);

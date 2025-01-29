@@ -95,7 +95,7 @@ public class CacheService_Should : IntegrationTestBase
         var distributedValue = DistributedCache[key];
 
         Assert.NotNull(distributedValue);
-    }    
+    }
 
     [Fact]
     public async Task Delete_MemoryCache_Value_When_It_Is_Invalidated()
@@ -115,6 +115,36 @@ public class CacheService_Should : IntegrationTestBase
         await Target.InvalidateAsync(key, CancellationToken);
 
         Assert.False(DistributedCache.ContainsKey(key));
+    }
+
+    [Fact]
+    public async Task Replace_Memory_Value_When_Force_Refresh_Option_Is_Set()
+    {
+        var unexpected = new DummyObject();
+        MemoryCache.Add(key, new DummyCacheEntry(key) { Value = unexpected });
+
+        var actual = await Target.GetOrSetAsync(key, new CacheServiceOptions { ForceRefresh = true }, () => expected, CancellationToken);
+        Assert.Equal(expected, actual);
+
+        var memoryValue = MemoryCache[key].Value;
+        Assert.Equal(expected, memoryValue);
+    }
+
+    [Fact]
+    public async Task Replace_Distributed_Value_When_Force_Refresh_Option_Is_Set()
+    {
+        var unexpected = new DummyObject();
+        var unexpectedSerialized = System.Text.Encoding.UTF8.GetBytes($@"{{""Id"":""{unexpected.Id}""}}");
+        DistributedCache.Add(key, unexpectedSerialized);
+
+        var actual = await Target.GetOrSetAsync(key, new CacheServiceOptions { ForceRefresh = true }, () => expected, CancellationToken);
+        Assert.Equal(expected, actual);
+
+        // Set operation is async, so we need to wait a bit
+        await Task.Delay(1000);
+
+        var distributedValue = DistributedCache[key];
+        Assert.Equal(serialized, distributedValue);
     }
 
     private sealed record TestData(string Id, string Field1, string Field2);
