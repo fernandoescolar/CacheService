@@ -47,6 +47,30 @@ internal class DefaultJobManager : IJobManager
         return Parallel.ForEachAsync(tasks, ExecuteJobAsync);
     }
 
-    private static ValueTask ExecuteJobAsync(KeyValuePair<string, IJob> job, CancellationToken cancellationToken)
-        => new(job.Value.ExecuteAsync(cancellationToken));
+    private async ValueTask ExecuteJobAsync(KeyValuePair<string, IJob> job, CancellationToken cancellationToken)
+    {
+        if (_configuration.BackgroundJobIgnoreExceptions)
+        {
+            await SafeExecuteAsync(job.Value, cancellationToken);
+        }
+        else
+        {
+            await UnsafeExecuteAsync(job.Value, cancellationToken);
+        }
+    }
+
+    private async ValueTask SafeExecuteAsync(IJob job, CancellationToken cancellationToken)
+    {
+        try
+        {
+            await job.ExecuteAsync(cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logger.UnexpectedBackgroundJobException(ex.ToString());
+        }
+    }
+
+    private static ValueTask UnsafeExecuteAsync(IJob job, CancellationToken cancellationToken)
+        =>new(job.ExecuteAsync(cancellationToken));
 }

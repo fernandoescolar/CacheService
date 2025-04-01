@@ -33,4 +33,10 @@ public class CacheServiceConfiguration
     /// </summary>
     /// <remarks>Default value is One minute.</remarks>
     public TimeSpan BackgroundJobInterval { get; set; } = TimeSpan.FromMinutes(1);
+
+    /// <summary>
+    /// Gets or sets if the background job should ignore exceptions.
+    /// </summary>
+    /// <remarks>Default value is false.</remarks>
+    public bool BackgroundJobIgnoreExceptions { get; set; } = false;
 }

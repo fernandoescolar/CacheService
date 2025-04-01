@@ -193,6 +193,7 @@ And you can configure the `ICacheService` with the following options:
 | UseDistributedCache | Sets if you want to manage `IDistributedCache` with `ICacheService` | `bool` | `true` |
 | BackgroundJobMode | Sets how you want to use the background process to automatically update your cache values<br/>*Options are: `None`, `HostedService` or `Timer`* | `BackgroundJobMode` | `BackgroundJobMode.HostedService` |
 | BackgroundJobInterval | Sets the background process to update cache value execution interval | `TimeSpan` | `TimeSpan.FromMinutes(1)` |
+| BackgroundJobIgnoreExceptions | Sets if you want to ignore exceptions in the background process | `bool` | `false` |
 
 ## Performance vs. HybridCache
 

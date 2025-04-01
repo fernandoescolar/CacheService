@@ -9,6 +9,7 @@ public abstract class IntegrationTestBase : IDisposable
 
     private readonly Lazy<ICacheService> _target;
     private readonly Lazy<IHostedService?> _jobHostedService;
+    private readonly Lazy<IJobManager?> _jobManager;
     private bool disposed = false;
 
     protected IntegrationTestBase()
@@ -27,6 +28,7 @@ public abstract class IntegrationTestBase : IDisposable
 
         _target = new Lazy<ICacheService>(() => _sp.GetRequiredService<ICacheService>());
         _jobHostedService = new Lazy<IHostedService?>(() => _sp.GetService<IHostedService>());
+        _jobManager = new Lazy<IJobManager?>(() => _sp.GetService<IJobManager>());
         TestScope = new CancellationTokenSource();
     }
 
@@ -40,6 +42,8 @@ public abstract class IntegrationTestBase : IDisposable
     protected IServiceProvider ServiceProvider => _sp;
 
     protected IHostedService? JobHostedService => _jobHostedService.Value;
+
+    internal IJobManager? JobManager => _jobManager.Value;
 
     protected DummyMemoryCache MemoryCache { get; private set; }
 

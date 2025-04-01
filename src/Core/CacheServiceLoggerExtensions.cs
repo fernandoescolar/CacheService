@@ -29,4 +29,6 @@ internal static partial class CacheServiceLoggerExtensions
     [LoggerMessage(8, LogLevel.Warning, "Cannot get from IDistributedCache with key: {Key} -> {ex}")]
     public static partial void CannotGetDistributedCache(this ILogger logger, string key, string ex);
 
+    [LoggerMessage(9, LogLevel.Warning, "Unexpected BackgroundJob Exception:  {ex}")]
+    public static partial void UnexpectedBackgroundJobException(this ILogger logger, string ex);
 }

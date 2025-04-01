@@ -1,3 +1,4 @@
+global using CacheService.Background;
 global using CacheService.Configuration;
 global using CacheService.Tests.Doubles;
 
