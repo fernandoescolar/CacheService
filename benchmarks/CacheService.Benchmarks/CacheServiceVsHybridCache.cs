@@ -17,7 +17,7 @@ public class CacheServiceVsHybridCache
         services.AddMemoryCache();
         services.AddStackExchangeRedisCache(options =>
         {
-            options.Configuration = "localhost:5002";
+            options.Configuration = "localhost:6379";
         });
 
         services.AddCacheService();
@@ -28,7 +28,7 @@ public class CacheServiceVsHybridCache
         _cacheService = provider.GetRequiredService<ICacheService>();
         _hybrid = provider.GetRequiredService<HybridCache>();
 
-        ConnectionMultiplexer.Connect("localhost:5002,allowAdmin=true").GetServer("localhost:5002").FlushDatabase();
+        ConnectionMultiplexer.Connect("localhost:6379,allowAdmin=true").GetServer("localhost:6379").FlushDatabase();
     }
 
     [Params(1, 10, 100, 200)]
