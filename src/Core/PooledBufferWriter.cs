@@ -17,7 +17,7 @@ internal sealed class PooledBufferWriter : IBufferWriter<byte>, IDisposable
             throw new ArgumentOutOfRangeException(nameof(count));
         }
 
-        if (_position + count >= _buffer.Length)
+        if (_position + count > _buffer.Length)
         {
             throw new InvalidOperationException("Cannot advance past the end of the buffer.");
         }
