@@ -16,15 +16,23 @@ internal sealed partial class UglyCacheService : ICacheService
     public UglyCacheService(IOptions<CacheServiceConfiguration> configuration, DelegatedFactories factories, ILogger<UglyCacheService> logger)
     {
         _defaultOptions = configuration.Value.DefaultOptions;
-        _memoryCache = factories.MemoryCacheFactory();
-        _distributedCache = factories.DistributedCacheFactory();
         _jobManager = factories.JobManagerFactory();
         _serializer = factories.CacheSerializerFactory();
         _logger = logger;
 
-        _useDistributedCache = _distributedCache is not null;
-        _useMemoryCache = _memoryCache is not null;
+        _useDistributedCache = _defaultOptions.UseDistributedCache;
+        _useMemoryCache = _defaultOptions.UseMemoryCache;
         _useJobManager = _jobManager is not null;
+
+        if (_useMemoryCache)
+        {
+            _memoryCache = factories.MemoryCacheFactory();
+        }
+
+        if (_useDistributedCache)
+        {
+            _distributedCache = factories.DistributedCacheFactory();
+        }
     }
 
     public async ValueTask<T?> GetOrSetAsync<T>(string key, CacheServiceOptions? options, Func<CancellationToken, ValueTask<T?>> getter, CancellationToken cancellationToken = default) where T : class
