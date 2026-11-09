@@ -207,55 +207,26 @@ The `CacheService` does not have this mechanism, but it has a background process
 
 ### Benchmark results
 
-You can see the benchmark project in the `benchmarks/CacheService.Benchmark` folder.
+You can see the benchmark project in the `benchmarks/CacheService.Benchmarks` folder.
 
 The latest results are:
 
-**Microsoft.Extensions.Caching.Hybrid v10.0.2**
-**.NET SDK 10.0.0**
+**Microsoft.Extensions.Caching.Hybrid v10.3.0**
+**.NET SDK 10.0.402**
 
-*Apple M3 Max, 1 CPU, 14 logical and 14 physical cores*
-| Method       | ConcurrentCalls | Mean       | Error     | StdDev    | Ratio | RatioSD | Gen0     | Gen1     | Allocated  | Alloc Ratio |
-|------------- |---------------- |-----------:|----------:|----------:|------:|--------:|---------:|---------:|-----------:|------------:|
-| CacheService | 1               |   189.7 us |   3.77 us |   3.70 us |  1.00 |    0.03 |   1.9531 |   0.4883 |   15.76 KB |        1.00 |
-| HybridCache  | 1               |   194.7 us |   3.64 us |   3.41 us |  1.03 |    0.03 |   3.9063 |   0.9766 |   24.76 KB |        1.57 |
-| CacheService | 10              |   471.7 us |   9.37 us |  12.51 us |  1.00 |    0.04 |  19.5313 |   5.8594 |  156.91 KB |        1.00 |
-| HybridCache  | 10              |   500.8 us |   9.87 us |  13.51 us |  1.06 |    0.04 |  35.1563 |   9.7656 |  247.54 KB |        1.58 |
-| CacheService | 100             | 2,838.7 us |  56.62 us | 102.10 us |  1.00 |    0.05 | 195.3125 |  85.9375 | 1567.08 KB |        1.00 |
-| HybridCache  | 100             | 3,261.0 us | 119.47 us | 241.33 us |  1.15 |    0.09 | 343.7500 |  93.7500 | 2472.64 KB |        1.58 |
-| CacheService | 200             | 5,269.5 us |  80.82 us |  67.49 us |  1.00 |    0.02 | 390.6250 | 125.0000 | 3134.97 KB |        1.00 |
-| HybridCache  | 200             | 6,115.3 us | 116.60 us | 109.07 us |  1.16 |    0.02 | 703.1250 | 242.1875 | 4944.25 KB |        1.58 |
+*AMD Ryzen AI Max+ 395, 1 CPU, 32 logical and 16 physical cores (Redis 7 in a local Docker container)*
+| Method       | ConcurrentCalls | Mean        | Error      | StdDev     | Ratio | RatioSD | Gen0     | Gen1     | Allocated  | Alloc Ratio |
+|------------- |---------------- |------------:|-----------:|-----------:|------:|--------:|---------:|---------:|-----------:|------------:|
+| CacheService | 1               |    39.73 us |   3.295 us |   6.657 us |  1.02 |    0.23 |   0.7324 |   0.3662 |    11.8 KB |        1.00 |
+| HybridCache  | 1               |    50.71 us |   5.199 us |   9.764 us |  1.31 |    0.32 |   1.9531 |   0.9766 |   24.76 KB |        2.10 |
+| CacheService | 10              |   196.52 us |  17.996 us |  36.353 us |  1.03 |    0.27 |   6.8359 |   5.8594 |  117.21 KB |        1.00 |
+| HybridCache  | 10              |   238.49 us |  21.178 us |  42.294 us |  1.25 |    0.32 |  18.5547 |   8.7891 |  247.47 KB |        2.11 |
+| CacheService | 100             | 1,268.87 us |  39.976 us |  76.059 us |  1.00 |    0.09 |  70.3125 |  62.5000 | 1171.04 KB |        1.00 |
+| HybridCache  | 100             | 2,010.11 us |  96.990 us | 193.699 us |  1.59 |    0.18 | 179.6875 |  85.9375 | 2472.75 KB |        2.11 |
+| CacheService | 200             | 3,609.04 us | 485.758 us | 947.434 us |  1.06 |    0.36 | 140.6250 | 132.8125 | 2342.34 KB |        1.00 |
+| HybridCache  | 200             | 4,429.93 us |  64.348 us |  53.734 us |  1.30 |    0.29 | 375.0000 | 187.5000 | 4945.36 KB |        2.11 |
 
-Old results with the previous versions of the libraries:
-
-**Microsoft.Extensions.Caching.Hybrid v9.0.0-preview.9.24556.5**
-**.NET SDK 10.0.0**
-
-*Apple M3 Max, 1 CPU, 14 logical and 14 physical cores*
-| Method       | ConcurrentCalls | Mean       | Error     | StdDev    | Ratio | RatioSD | Gen0     | Gen1     | Allocated  | Alloc Ratio |
-|------------- |---------------- |-----------:|----------:|----------:|------:|--------:|---------:|---------:|-----------:|------------:|
-| CacheService | 1               |   191.2 us |   3.74 us |   6.46 us |  1.00 |    0.05 |   1.9531 |   0.4883 |   15.76 KB |        1.00 |
-| HybridCache  | 1               |   196.2 us |   3.23 us |   3.02 us |  1.03 |    0.04 |   3.9063 |   0.9766 |   24.76 KB |        1.57 |
-| CacheService | 10              |   461.6 us |   9.20 us |  11.30 us |  1.00 |    0.03 |  19.5313 |   5.8594 |  156.91 KB |        1.00 |
-| HybridCache  | 10              |   482.2 us |   5.44 us |   4.82 us |  1.05 |    0.03 |  35.1563 |  10.7422 |  247.52 KB |        1.58 |
-| CacheService | 100             | 2,834.2 us |  56.60 us |  88.12 us |  1.00 |    0.04 | 195.3125 |  62.5000 | 1567.49 KB |        1.00 |
-| HybridCache  | 100             | 3,247.8 us | 103.68 us | 199.76 us |  1.15 |    0.08 | 351.5625 |  93.7500 | 2472.72 KB |        1.58 |
-| CacheService | 200             | 5,090.7 us |  85.30 us |  71.23 us |  1.00 |    0.02 | 390.6250 | 125.0000 | 3134.97 KB |        1.00 |
-| HybridCache  | 200             | 5,894.4 us | 111.58 us | 109.59 us |  1.16 |    0.03 | 718.7500 | 210.9375 | 4946.38 KB |        1.58 |
-
-*Intel Core i7-9750H CPU 2.60GHz, 1 CPU, 12 logical and 6 physical cores*
-| Method       | ConcurrentCalls | Mean      | Error     | StdDev    | Ratio | RatioSD | Gen0     | Gen1     | Allocated  | Alloc Ratio |
-|------------- |---------------- |----------:|----------:|----------:|------:|--------:|---------:|---------:|-----------:|------------:|
-| CacheService | 1               |  1.038 ms | 0.0200 ms | 0.0222 ms |  1.00 |    0.03 |   1.9531 |        - |   15.82 KB |        1.00 |
-| HybridCache  | 1               |  1.071 ms | 0.0210 ms | 0.0225 ms |  1.03 |    0.03 |   3.9063 |   1.9531 |   24.57 KB |        1.55 |
-| CacheService | 10              |  1.429 ms | 0.0310 ms | 0.0619 ms |  1.00 |    0.06 |  23.4375 |   7.8125 |  156.56 KB |        1.00 |
-| HybridCache  | 10              |  1.495 ms | 0.0383 ms | 0.0747 ms |  1.05 |    0.07 |  46.8750 |  11.7188 |  244.73 KB |        1.56 |
-| CacheService | 100             |  5.718 ms | 0.1479 ms | 0.2885 ms |  1.00 |    0.07 | 250.0000 |  93.7500 | 1563.96 KB |        1.00 |
-| HybridCache  | 100             |  6.073 ms | 0.1571 ms | 0.3138 ms |  1.06 |    0.08 | 437.5000 | 125.0000 | 2445.72 KB |        1.56 |
-| CacheService | 200             | 10.890 ms | 0.1673 ms | 0.1927 ms |  1.00 |    0.02 | 531.2500 | 171.8750 | 3127.65 KB |        1.00 |
-| HybridCache  | 200             | 12.408 ms | 0.3590 ms | 0.7002 ms |  1.14 |    0.07 | 765.6250 | 437.5000 | 4096.64 KB |        1.31 |
-
-As you can see, the `CacheService` is faster than the `HybridCache` in all scenarios but the difference is not significant. Related to memory usage, the `CacheService` is more efficient than the `HybridCache` because it does not need to use a distributed lock to avoid the stampede effect.
+As you can see, the `CacheService` is faster than the `HybridCache` in all scenarios, but the time measures depend a lot on the Redis latency and their deviation is high. Related to memory usage, the `CacheService` is more efficient than the `HybridCache` (in the latest results it allocates less than half of the memory) because it does not need to use a distributed lock to avoid the stampede effect.
 
 ## License
 

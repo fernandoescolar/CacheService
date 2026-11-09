@@ -9,9 +9,9 @@ internal sealed class FastJsonSerializer : ICacheSerializer
             return default;
         }
 
-        var buffer = new ReadOnlySequence<byte>(bytes, 0, bytes.Length);
-        var reader = new Utf8JsonReader(buffer);
-        return JsonSerializer.Deserialize<T>(ref reader);
+        // the span overload parses the payload once: the Utf8JsonReader one needs
+        // a first pass to find the end of the value before deserializing it
+        return JsonSerializer.Deserialize<T>(new ReadOnlySpan<byte>(bytes));
     }
 
     public void Serialize<T>(T value, IBufferWriter<byte> target)

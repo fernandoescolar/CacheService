@@ -97,4 +97,29 @@ public class PooledBufferWriterTests
 		Assert.Equal(new byte[] { 10, 20, 30, 40, 50, 60 }, writer.ToArray());
 	}
 
+	[Fact]
+	public void GetSpan_WithEnoughFreeSpace_DoesNotGrowBuffer()
+	{
+		using var writer = new PooledBufferWriter();
+
+		var initial = writer.GetSpan(32);
+		writer.Advance(8);
+
+		Assert.Equal(initial.Length - 8, writer.GetSpan(8).Length);
+		Assert.Equal(initial.Length - 8, writer.GetMemory(8).Length);
+		Assert.Equal(initial.Length - 8, writer.GetSpan().Length);
+	}
+
+	[Fact]
+	public void GetSpan_WithoutFreeSpace_GrowsBuffer()
+	{
+		using var writer = new PooledBufferWriter();
+
+		var initial = writer.GetSpan(32);
+		writer.Advance(initial.Length);
+
+		Assert.False(writer.GetSpan().IsEmpty);
+		Assert.True(writer.GetSpan(64).Length >= 64);
+	}
+
 }

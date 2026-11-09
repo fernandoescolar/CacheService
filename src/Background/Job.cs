@@ -38,9 +38,12 @@ internal abstract class Job<T> : IJob
     }
 
     public Job<T> UpdateJob(Job<T> otherJob)
+        => UpdateJob(otherJob.Options, otherJob.ValueGetter);
+
+    public Job<T> UpdateJob(CacheOptions options, Func<CancellationToken, ValueTask<T?>> valueGetter)
     {
-        Options = otherJob.Options;
-        ValueGetter = otherJob.ValueGetter;
+        Options = options;
+        ValueGetter = valueGetter;
         return this;
     }
 

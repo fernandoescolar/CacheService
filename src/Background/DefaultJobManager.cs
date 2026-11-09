@@ -2,13 +2,18 @@
 
 internal class DefaultJobManager : IJobManager
 {
-    private readonly ConcurrentDictionary<string, IJob> _jobs = new();
+    private readonly ConcurrentDictionary<string, IJob> _memoryJobs = new();
+    private readonly ConcurrentDictionary<string, IJob> _distributedJobs = new();
     private readonly CacheServiceConfiguration _configuration;
     private readonly MemoryCacheFactory _memoryCacheFactory;
     private readonly DistributedCacheFactory _distributedCacheFactory;
     private readonly CacheSerializerFactory _serializerFactory;
     private readonly ILoggerFactory _loggerFactory;
     private readonly ILogger<DefaultJobManager> _logger;
+
+    // These flags avoid to look for a job in every cache read when there are no registered jobs.
+    private volatile bool _hasMemoryJobs;
+    private volatile bool _hasDistributedJobs;
 
     public DefaultJobManager(IOptions<CacheServiceConfiguration> configuration, MemoryCacheFactory memoryCacheFactory, DistributedCacheFactory distributedCacheFactory, CacheSerializerFactory serializerFactory, ILoggerFactory loggerFactory)
     {
@@ -30,32 +35,77 @@ internal class DefaultJobManager : IJobManager
 
         if (options.UseMemoryCache)
         {
-            var memoryJob = new MemoryJob<T>(_memoryCacheFactory, new JobParameters<T>(key, options.Memory, valueGetter), _loggerFactory.CreateLogger<MemoryJob<T>>());
-            _jobs.AddOrUpdate($"MemoryJob_{key}", memoryJob, (k, j) => j.UpdateJob(memoryJob));
+            var memoryOptions = options.Memory;
+            if (_hasMemoryJobs && _memoryJobs.TryGetValue(key, out var job))
+            {
+                UpdateJob(job, memoryOptions, valueGetter);
+            }
+            else if (memoryOptions.RefreshInterval is not null)
+            {
+                AddMemoryJob(key, memoryOptions, valueGetter);
+            }
         }
 
         if (options.UseDistributedCache)
         {
-            var distributedJob = new DistributedJob<T>(_distributedCacheFactory, _serializerFactory, new JobParameters<T>(key, options.Distributed, valueGetter), _loggerFactory.CreateLogger<DistributedJob<T>>());
-            _jobs.AddOrUpdate($"DistributedJob_{key}", distributedJob, (k, j) => j.UpdateJob(distributedJob));
+            var distributedOptions = options.Distributed;
+            if (_hasDistributedJobs && _distributedJobs.TryGetValue(key, out var job))
+            {
+                UpdateJob(job, distributedOptions, valueGetter);
+            }
+            else if (distributedOptions.RefreshInterval is not null)
+            {
+                AddDistributedJob(key, distributedOptions, valueGetter);
+            }
         }
     }
 
     public Task ExecuteJobsAsync(CancellationToken cancellationToken)
     {
-        var tasks = _jobs.Where(x => x.Value.DueTime <= DateTime.UtcNow).ToList();
-        return Parallel.ForEachAsync(tasks, ExecuteJobAsync);
+        var now = DateTime.UtcNow;
+        var jobs = _memoryJobs.Concat(_distributedJobs)
+                              .Select(x => x.Value)
+                              .Where(x => x.DueTime <= now)
+                              .ToList();
+
+        return jobs.Count == 0 ? Task.CompletedTask : Parallel.ForEachAsync(jobs, ExecuteJobAsync);
     }
 
-    private async ValueTask ExecuteJobAsync(KeyValuePair<string, IJob> job, CancellationToken cancellationToken)
+    private static void UpdateJob<T>(IJob job, CacheOptions options, Func<CancellationToken, ValueTask<T?>> valueGetter)
+    {
+        if (job is not Job<T> typedJob)
+        {
+            throw new InvalidOperationException($"otherJob doesn't is a JobDetails<{typeof(T).Name}>");
+        }
+
+        typedJob.UpdateJob(options, valueGetter);
+    }
+
+    // A job without RefreshInterval is never executed, so it is created only when it is needed:
+    // these methods are out of the hot path.
+    private void AddMemoryJob<T>(string key, CacheOptions options, Func<CancellationToken, ValueTask<T?>> valueGetter)
+    {
+        var memoryJob = new MemoryJob<T>(_memoryCacheFactory, new JobParameters<T>(key, options, valueGetter), _loggerFactory.CreateLogger<MemoryJob<T>>());
+        _hasMemoryJobs = true;
+        _memoryJobs.AddOrUpdate(key, memoryJob, (_, j) => j.UpdateJob(memoryJob));
+    }
+
+    private void AddDistributedJob<T>(string key, CacheOptions options, Func<CancellationToken, ValueTask<T?>> valueGetter)
+    {
+        var distributedJob = new DistributedJob<T>(_distributedCacheFactory, _serializerFactory, new JobParameters<T>(key, options, valueGetter), _loggerFactory.CreateLogger<DistributedJob<T>>());
+        _hasDistributedJobs = true;
+        _distributedJobs.AddOrUpdate(key, distributedJob, (_, j) => j.UpdateJob(distributedJob));
+    }
+
+    private async ValueTask ExecuteJobAsync(IJob job, CancellationToken cancellationToken)
     {
         if (_configuration.BackgroundJobIgnoreExceptions)
         {
-            await SafeExecuteAsync(job.Value, cancellationToken);
+            await SafeExecuteAsync(job, cancellationToken);
         }
         else
         {
-            await UnsafeExecuteAsync(job.Value, cancellationToken);
+            await UnsafeExecuteAsync(job, cancellationToken);
         }
     }
 

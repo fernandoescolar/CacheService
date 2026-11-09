@@ -29,7 +29,7 @@ internal class DistributedJob<T> : Job<T>
             var serializer = _serializerFactory();
             using var buffer = new PooledBufferWriter();
             serializer.Serialize(value, buffer);
-            await distributedCache.SetAsync(Key, buffer.ToArray(), Options, cancellationToken);
+            await distributedCache.SetAsync(Key, buffer, Options, cancellationToken);
         }
         catch (Exception ex)
         {

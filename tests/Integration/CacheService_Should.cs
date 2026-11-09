@@ -168,5 +168,44 @@ public class CacheService_Should : IntegrationTestBase
         Assert.True(DistributedCache.ContainsKey(key));
     }
 
+    [Fact]
+    public async Task Return_A_Canceled_Task_When_CancellationToken_Is_Canceled()
+    {
+        using var cts = new CancellationTokenSource();
+        await cts.CancelAsync();
+
+        // the exception is not thrown here, but when the result is awaited
+        var task = Target.GetOrSetAsync(key, () => expected, cts.Token).AsTask();
+
+        await Assert.ThrowsAsync<OperationCanceledException>(() => task);
+        Assert.True(task.IsCanceled);
+        Assert.False(MemoryCache.ContainsKey(key));
+    }
+
+    [Fact]
+    public async Task Return_A_Faulted_Task_When_Memory_Value_Has_Another_Type()
+    {
+        MemoryCache.Add(key, new DummyCacheEntry(key) { Value = expected });
+
+        // the exception is not thrown here, but when the result is awaited
+        var task = Target.GetOrSetAsync(key, () => "other type", CancellationToken).AsTask();
+
+        await Assert.ThrowsAsync<InvalidCastException>(() => task);
+        Assert.True(task.IsFaulted);
+    }
+
+    [Fact]
+    public async Task Return_A_Faulted_Task_When_A_Job_Exists_With_Another_Type()
+    {
+        var options = new CacheServiceOptions { UseDistributedCache = false };
+        options.Memory.RefreshInterval = TimeSpan.FromHours(1);
+        await Target.GetOrSetAsync(key, options, () => expected, CancellationToken);
+
+        // the exception is not thrown here, but when the result is awaited
+        var task = Target.GetOrSetAsync(key, options, () => "other type", CancellationToken).AsTask();
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() => task);
+    }
+
     private sealed record TestData(string Id, string Field1, string Field2);
 }

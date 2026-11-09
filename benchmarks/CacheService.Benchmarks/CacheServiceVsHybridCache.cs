@@ -28,7 +28,8 @@ public class CacheServiceVsHybridCache
         _cacheService = provider.GetRequiredService<ICacheService>();
         _hybrid = provider.GetRequiredService<HybridCache>();
 
-        ConnectionMultiplexer.Connect("localhost:6379,allowAdmin=true").GetServer("localhost:6379").FlushDatabase();
+        // the previous benchmark can leave millions of keys: flushing them can take more than the default timeout (5s)
+        ConnectionMultiplexer.Connect("localhost:6379,allowAdmin=true,syncTimeout=120000").GetServer("localhost:6379").FlushDatabase();
     }
 
     [Params(1, 10, 100, 200)]

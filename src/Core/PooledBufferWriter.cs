@@ -67,12 +67,18 @@ internal sealed class PooledBufferWriter : IBufferWriter<byte>, IDisposable
 
     private void Resize(int sizeHint)
     {
-        var newSize = _buffer.Length == 0 ? 1 : _buffer.Length * 2;
-        if (sizeHint > 0)
+        if (sizeHint < 1)
         {
-            newSize = Math.Max(newSize, sizeHint + _position);
+            sizeHint = 1;
         }
 
+        if (_buffer.Length - _position >= sizeHint)
+        {
+            // there is enough free space: renting (and copying to) a bigger buffer is not needed
+            return;
+        }
+
+        var newSize = Math.Max(_buffer.Length * 2, sizeHint + _position);
         var newBuffer = ArrayPool<byte>.Shared.Rent(newSize);
         if (_position > 0)
         {

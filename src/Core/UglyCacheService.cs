@@ -35,28 +35,46 @@ internal sealed partial class UglyCacheService : ICacheService
         }
     }
 
-    public async ValueTask<T?> GetOrSetAsync<T>(string key, CacheServiceOptions? options, Func<CancellationToken, ValueTask<T?>> getter, CancellationToken cancellationToken = default) where T : class
+    public ValueTask<T?> GetOrSetAsync<T>(string key, CacheServiceOptions? options, Func<CancellationToken, ValueTask<T?>> getter, CancellationToken cancellationToken = default) where T : class
     {
-        cancellationToken.ThrowIfCancellationRequested();
+        // This method is not async on purpose: when the value is in the memory cache (the hot path)
+        // it completes synchronously, so it does not need an async state machine.
+        // As it would happen in an async method, the exceptions are returned inside the ValueTask.
         var ops = options ?? _defaultOptions;
+        var forceRefresh = options?.ForceRefresh ?? false;
 
-        var result = default(T);
-        AddOrUpdateJob(key, ops, getter);
-
-        if (!(options?.ForceRefresh ?? false))
+        if (!cancellationToken.IsCancellationRequested)
         {
-            if (ops.UseMemoryCache && TryGetFromMemory(key, ref result))
+            try
+            {
+                var result = default(T);
+                AddOrUpdateJob(key, ops, getter);
+
+                if (!forceRefresh && ops.UseMemoryCache && TryGetFromMemory(key, ref result))
+                {
+                    return new ValueTask<T?>(result);
+                }
+            }
+            catch (Exception ex)
+            {
+                return ValueTask.FromException<T?>(ex);
+            }
+        }
+
+        return GetFromDistributedOrSourceAsync(key, ops, forceRefresh, getter, cancellationToken);
+    }
+
+    private async ValueTask<T?> GetFromDistributedOrSourceAsync<T>(string key, CacheServiceOptions ops, bool forceRefresh, Func<CancellationToken, ValueTask<T?>> getter, CancellationToken cancellationToken) where T : class
+    {
+        // when the operation is cancelled nothing has been done yet
+        cancellationToken.ThrowIfCancellationRequested();
+
+        if (!forceRefresh && ops.UseDistributedCache)
+        {
+            var result = await TryGetFromDistributedAsync<T>(key, ops, cancellationToken);
+            if (result is not null)
             {
                 return result;
-            }
-
-            if (ops.UseDistributedCache)
-            {
-                result = await TryGetFromDistributedAsync<T>(key, ops, cancellationToken);
-                if (result is not null)
-                {
-                    return result;
-                }
             }
         }
 

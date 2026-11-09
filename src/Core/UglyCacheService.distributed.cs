@@ -46,7 +46,7 @@ sealed partial class UglyCacheService
                     using var buffer = new PooledBufferWriter();
                     _serializer.Serialize(result, buffer);
                     #nullable disable
-                    await _distributedCache.SetAsync(key, buffer.ToArray(), ops.Distributed, default);
+                    await _distributedCache.SetAsync(key, buffer, ops.Distributed, default);
                     #nullable restore
                 }
                 catch (JsonException jex)
