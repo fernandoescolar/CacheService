@@ -13,5 +13,4 @@ global using Microsoft.Extensions.Options;
 
 global using System.Buffers;
 global using System.Collections.Concurrent;
-global using System.Runtime.CompilerServices;
 global using System.Text.Json;

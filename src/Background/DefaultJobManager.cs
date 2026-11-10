@@ -97,15 +97,15 @@ internal class DefaultJobManager : IJobManager
         _distributedJobs.AddOrUpdate(key, distributedJob, (_, j) => j.UpdateJob(distributedJob));
     }
 
-    private async ValueTask ExecuteJobAsync(IJob job, CancellationToken cancellationToken)
+    private ValueTask ExecuteJobAsync(IJob job, CancellationToken cancellationToken)
     {
         if (_configuration.BackgroundJobIgnoreExceptions)
         {
-            await SafeExecuteAsync(job, cancellationToken);
+            return SafeExecuteAsync(job, cancellationToken);
         }
         else
         {
-            await UnsafeExecuteAsync(job, cancellationToken);
+            return UnsafeExecuteAsync(job, cancellationToken);
         }
     }
 

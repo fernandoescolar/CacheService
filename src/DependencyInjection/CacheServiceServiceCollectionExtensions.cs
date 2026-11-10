@@ -10,14 +10,13 @@ public static class CacheServiceServiceCollectionExtensions
     /// <param name="configure">Configuration method.</param>
     /// <returns>The current <see cref="IServiceCollection" /></returns>
     public static IServiceCollection AddCacheService(this IServiceCollection services, Action<CacheServiceConfiguration>? configure = null)
-    {
-        services.Configure<CacheServiceConfiguration>(options => configure?.Invoke(options));
-        services.AddBackgroundDependencies();
-        services.AddDelegatedFactories();
-        services.AddCacheServiceFactory();
+        =>
+            services.Configure<CacheServiceConfiguration>(options => configure?.Invoke(options))
+                .AddBackgroundDependencies()
+                .AddDelegatedFactories()
+                .AddCacheServiceFactory();
 
-        return services;
-    }
+
 
     private static IServiceCollection AddCacheServiceFactory(this IServiceCollection services)
     {

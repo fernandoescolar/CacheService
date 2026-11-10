@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
+    <TargetFrameworks>net8.0;net9.0;net10.0;net11.0</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <OutputType>Library</OutputType>
@@ -32,6 +32,11 @@
     <PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="10.*" />
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.*" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.*" />
+  </ItemGroup>
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net11.0' ">
+    <PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="11.*" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="11.*" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="11.*" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\README.md" Pack="true" PackagePath="" />

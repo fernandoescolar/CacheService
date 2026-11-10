@@ -1,4 +1,5 @@
-﻿using ConsoleApp;
+﻿using System.Security.Cryptography;
+using ConsoleApp;
 using CacheService;
 using CacheService.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -17,17 +18,16 @@ services.AddCacheService(op =>
 
 var provider = services.BuildServiceProvider();
 var cache = provider.GetRequiredService<ICacheService>();
-var random = new Random();
 
-var value = await cache.GetOrSetAsync("value", _ => ValueTask.FromResult<Number?>(new Number(random.Next(0, 1000))));
+var value = await cache.GetOrSetAsync("value", _ => ValueTask.FromResult<Number?>(new Number(RandomNumberGenerator.GetInt32(0, 1000))));
 Console.WriteLine($"Value is: {value}");
 
 await Task.Delay(5_000);
 
-value = await cache.GetOrSetAsync("value", _ => ValueTask.FromResult<Number?>(new Number(random.Next(0, 1000))));
+value = await cache.GetOrSetAsync("value", _ => ValueTask.FromResult<Number?>(new Number(RandomNumberGenerator.GetInt32(0, 1000))));
 Console.WriteLine($"Value is: {value}");
 
 await Task.Delay(10_000);
 
-value = await cache.GetOrSetAsync("value", _ => ValueTask.FromResult<Number?>(new Number(random.Next(0, 1000))));
+value = await cache.GetOrSetAsync("value", _ => ValueTask.FromResult<Number?>(new Number(RandomNumberGenerator.GetInt32(0, 1000))));
 Console.WriteLine($"Value is: {value}");
